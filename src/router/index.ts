@@ -10,10 +10,84 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/about',
     name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
+    component: () =>
+      import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
+  },
+  {
+    path: '/photos',
+    children: [
+      {
+        path: ':id',
+        name: 'photo',
+        component: () =>
+          import(
+            /* webpackChunkName: "photo" */ '../views/Photos/PhotoView.vue'
+          )
+      },
+      {
+        path: '',
+        name: 'photos',
+        component: () =>
+          import(
+            /* webpackChunkName: "photos" */ '../views/Photos/PhotosView.vue'
+          )
+      }
+    ]
+  },
+  {
+    path: '/albums',
+    children: [
+      {
+        path: ':id',
+        name: 'album',
+        redirect: { name: 'album-photos' }
+      },
+      {
+        path: ':id/photos',
+        name: 'album-photos',
+        component: () => import('../views/Albums/AlbumPhotosView.vue')
+      },
+      {
+        path: ':id/photos/:photoId',
+        name: 'album-photo',
+        component: () => import('../views/Photos/PhotoView.vue')
+      },
+      {
+        path: '',
+        name: 'albums',
+        component: () =>
+          import(
+            /* webpackChunkName: "albums" */ '../views/Albums/AlbumsView.vue'
+          )
+      }
+    ]
+  },
+  {
+    path: '/auth',
+    children: [
+      {
+        path: 'login',
+        name: 'login',
+        component: () =>
+          import(/* webpackChunkName: "login" */ '../views/Auth/LoginView.vue')
+      },
+      {
+        path: 'forgot',
+        name: 'forgot',
+        component: () =>
+          import(
+            /* webpackChunkName: "forgot" */ '../views/Auth/ForgotView.vue'
+          )
+      },
+      {
+        path: 'shared/:id',
+        name: 'shared-auth',
+        component: () =>
+          import(
+            /* webpackChunkName: "shared-auth" */ '../views/Auth/SharedAuthView.vue'
+          )
+      }
+    ]
   }
 ]
 
