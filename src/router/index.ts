@@ -1,3 +1,4 @@
+import authGuard from '@/services/auth-guard'
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 
@@ -15,6 +16,7 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/photos',
+    beforeEnter: [authGuard],
     children: [
       {
         path: ':id',
@@ -36,6 +38,7 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/albums',
+    beforeEnter: [authGuard],
     children: [
       {
         path: ':id',
@@ -64,6 +67,8 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/auth',
+    redirect: { name: 'login' },
+    component: () => import('../views/Auth/AuthView.vue'),
     children: [
       {
         path: 'login',
