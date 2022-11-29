@@ -1,18 +1,20 @@
 <template>
-  <button @click="add">add</button>
-  <p>{{ text }}</p>
+  <div>
+    <button @click="add">add</button>
+    <a v-for="(img, index) in imgs" :href="'/photos/' + index"><img src="../../../public/img/icons/android-chrome-192x192.png"/></a>
+    <p>{{ text }}</p>
+  </div>  
 </template>
 <script>
 export default {
   data() {
     return {
-      text: 'Hello World'
+      imgs: ["../../../public/img/icons/android-chrome-192x192.png","../../../public/img/icons/android-chrome-192x192.png","../../../public/img/icons/android-chrome-192x192.png"]
     }
   },
   methods: {
     add() {
-      this.text +=
-        'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Officiis quas harum nulla corrupti, sunt earum enim neque voluptatibus praesentium, beatae libero dolorem perspiciatis consequatur doloremque accusantium ullam deserunt laborum optio!'
+      this.imgs.push('../../../public/img/icons/android-chrome-192x192.png');
     }
   }
 }
