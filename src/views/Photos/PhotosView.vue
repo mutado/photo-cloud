@@ -13,14 +13,23 @@
     </a>
   </div>
 </template>
-<script>
-export default {
+<script lang="ts">
+import Photo from '@/models/Photo'
+import { defineComponent } from 'vue'
+
+export default defineComponent({
   data() {
     return {
       imgs: [],
       imageAdded: false,
       inputMessageText: "",
     };
+  },
+  mounted() {
+    Photo.index()
+  },
+  computed: {
+    photos: () => Photo.all()
   },
   methods: {
     addImage() {

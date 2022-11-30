@@ -14,10 +14,7 @@ export default class User extends Model {
   }
 
   static isAuthenticated() {
-    let user = JSON.parse(localStorage.getItem('user') || '{}')
-    if (user.token) {
-      User.insert({ data: user.user })
-    }
+    let user = this.me()
     return user.token !== undefined
   }
 
@@ -38,5 +35,9 @@ export default class User extends Model {
 
         return response.response.data
       })
+  }
+
+  static me() {
+    return JSON.parse(localStorage.getItem('user') || '{}')
   }
 }
