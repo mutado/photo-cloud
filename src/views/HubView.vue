@@ -1,19 +1,32 @@
 <template>
   <div id="Hub">
     <Header />
-    <Sidebar />
-    <router-view />
+    <div class="content">
+      <Sidebar />
+      <div>
+        <router-view />
+      </div>
+    </div>
   </div>
 </template>
 
-<script>
-import Header from "@/components/Header.vue";
-import Sidebar from "@/components/Sidebar.vue";
+<script lang="ts">
+import Header from '@/components/AppHeader.vue'
+import Sidebar from '@/components/AppSidebar.vue'
+import { defineComponent } from 'vue'
 
-export default {
-  name: "HubView",
+export default defineComponent({
+  name: 'HubView',
   components: {
-    Header, Sidebar
-  },
-};
+    Header,
+    Sidebar
+  }
+})
 </script>
+<style scoped>
+.content {
+  display: grid;
+  grid-template-columns: 1fr 4fr;
+  gap: 20px;
+}
+</style>

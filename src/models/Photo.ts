@@ -4,8 +4,8 @@ import axios from 'axios'
 export default class Photo extends Model {
   static entity = 'photos'
 
-  id!: number
-  user_id!: number
+  id!: string
+  user_id!: string
   path!: string
   created_at!: string
   updated_at!: string

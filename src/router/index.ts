@@ -41,6 +41,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/albums',
     beforeEnter: [authGuard],
+    component: HubView,
     children: [
       {
         path: ':id',

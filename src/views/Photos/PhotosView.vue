@@ -1,71 +1,46 @@
 <template>
-  <div id="photosView">
-    <button @click="addImage">add image</button>
-    <div v-show="imageAdded">
-      <h5>Give the link to the image</h5>
-      <input id="imgLinkInput" /><br />
-      <button @click="close">close</button>
-      <button @click="save">save</button>
-    </div>
-    <p id="inputMessage">{{ inputMessageText }}</p>
-    <a v-for="(img, index) in imgs" :href="'/photos/' + index">
-      <img :src="img" />
-    </a>
+  <input type="range" v-model="zoom" min="3" max="9" />
+  {{ 12 - zoom }}
+  <div
+    class="grid"
+    :style="{
+      gridTemplateColumns: `repeat(${12 - zoom},1fr)`
+    }"
+  >
+    <photo-thumbnail
+      v-for="photo in photos"
+      :key="photo.id"
+      :photo_id="photo.id"
+    />
   </div>
 </template>
 <script lang="ts">
+import PhotoThumbnail from '@/components/PhotoThumbnail.vue'
 import Photo from '@/models/Photo'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  components: { PhotoThumbnail },
   data() {
     return {
+      zoom: 3,
       imgs: [],
       imageAdded: false,
-      inputMessageText: "",
-    };
+      inputMessageText: ''
+    }
   },
   mounted() {
     Photo.index()
   },
   computed: {
     photos: () => Photo.all()
-  },
-  methods: {
-    addImage() {
-      this.imageAdded = true;
-      this.inputMessageText = '';
-    },
-    save() {
-      if (this.isImage(imgLinkInput.value)) {
-        this.imgs.push(imgLinkInput.value);
-        this.endSave(true);
-      } else {
-        this.endSave(false);
-      }
-    },
-    endSave(success) {
-      this.imageAdded = false;
-      imgLinkInput.value = "";
-      if (success) {
-        this.inputMessageText = "Photo was added successfuly.";
-      } else {
-        this.inputMessageText = "Error: link is not reffering to the image.";
-      }
-    },
-    close() {
-      this.imageAdded = false;
-    },
-    isImage(url) {
-      return /\.(jpg|jpeg|png|webp|avif|gif|svg)$/.test(url);
-    },
-  },
-};
+  }
+})
 </script>
-<style>
-#photosView {
-  position: absolute;
-  left: 25%;
-  top: 80px;
+<style scoped>
+.grid {
+  display: grid;
+  grid-gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
 }
 </style>
