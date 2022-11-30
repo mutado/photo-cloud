@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import HubView from '../views/HubView.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -15,6 +16,7 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/photos',
+    component: HubView,
     children: [
       {
         path: ':id',
