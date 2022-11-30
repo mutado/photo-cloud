@@ -1,15 +1,29 @@
 <template>
-  <div>
-    <img height="150" v-for="(photo, index) in photos" :src="photo.image" />
+  <input type="range" v-model="zoom" min="3" max="9" />
+  {{ 12 - zoom }}
+  <div
+    class="grid"
+    :style="{
+      gridTemplateColumns: `repeat(${12 - zoom},1fr)`
+    }"
+  >
+    <photo-thumbnail
+      v-for="photo in photos"
+      :key="photo.id"
+      :photo_id="photo.id"
+    />
   </div>
 </template>
 <script lang="ts">
+import PhotoThumbnail from '@/components/PhotoThumbnail.vue'
 import Photo from '@/models/Photo'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  components: { PhotoThumbnail },
   data() {
     return {
+      zoom: 3,
       imgs: [],
       imageAdded: false,
       inputMessageText: ''
@@ -20,11 +34,13 @@ export default defineComponent({
   },
   computed: {
     photos: () => Photo.all()
-  },
-  methods: {
-    isImage(url: any) {
-      return /\.(jpg|jpeg|png|webp|avif|gif|svg)$/.test(url)
-    }
   }
 })
 </script>
+<style scoped>
+.grid {
+  display: grid;
+  grid-gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+}
+</style>

@@ -5,7 +5,11 @@ body {
 }
 
 /* include border and padding in element width and height */
-* {
+*,
+*:before,
+*:after {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
 
@@ -15,7 +19,28 @@ div#app {
   width: 100%;
 
   /* example padding, font-size, background, etc */
-  padding: 10px;
   font-size: 20px;
-  background-color: green;
+  background-image: url('/img/background.png');
+  background-size: cover;
+}
+
+.v-button {
+  display: inline-block;
+  padding: 14px 20px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.v-button--sidebar {
+  text-align: left;
+  background-color: transparent;
+}
+.v-button--sidebar:hover {
+  background-color: rgba(247, 246, 246, 0.7);
+}
+.v-button--sidebar.router-link-active {
+  background-color: rgba(195, 195, 195, 0.7);
 }
