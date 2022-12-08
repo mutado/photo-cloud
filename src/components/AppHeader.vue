@@ -26,7 +26,7 @@
         </v-button>
       </div>
       <div class="headerChild">
-        <v-button>
+        <v-button :to="'/about'">
           <i class="bi bi-light bi-cloud-upload"></i>
         </v-button>
         <v-button>

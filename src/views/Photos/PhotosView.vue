@@ -1,5 +1,8 @@
 <template>
-  <div class="wrapper" ref="container">
+  <button @click="loadMore" :disabled="photos.length >= photoCount">
+    load more {{ photos.length }}
+  </button>
+  <div class="wrapper" ref="container" @scroll="onScroll">
     <div
       class="grid"
       :style="{
@@ -29,16 +32,26 @@ export default defineComponent({
     return {
       imgs: [],
       imageAdded: false,
-      inputMessageText: ''
+      inputMessageText: '',
+      loadingHandler: null as any
     }
   },
   mounted() {
-    Photo.index().then(() => {
-      this.$refs.container.parentElement.scrollTop =
-        this.$refs.container.parentElement.scrollHeight
+    this.loadMore().then(() => {
+      this.scrollToBottom()
     })
+    this.scrollToBottom()
   },
   methods: {
+    loadMore() {
+      return (this.loadingHandler = Photo.index(this.photoPage).then(() => {
+        this.loadingHandler = null
+      }))
+    },
+    scrollToBottom() {
+      this.$refs.container.parentElement.scrollTop =
+        this.$refs.container.parentElement.scrollHeight
+    },
     select(id: string) {
       if (this.selected.includes(id)) {
         this.selected = this.selected.filter((i: string) => i != id)
@@ -48,10 +61,27 @@ export default defineComponent({
       console.log(this.selected)
     }
   },
+  watch: {
+    scrollTop(val) {
+      console.log('scrolltop', val)
+      if (val < 100 && this.loadingHandler == null) {
+        console.log(this.photoPage)
+
+        console.log('loading more')
+        this.loadMore()
+      }
+    }
+  },
   computed: {
-    photos: () => Photo.all(),
+    photos: () => Photo.query().orderBy('created_at', 'desc').get(),
     zoom() {
       return this.$store.state.entities.photos.zoom
+    },
+    photoPage() {
+      return this.$store.state.entities.photos.page
+    },
+    photoCount() {
+      return this.$store.state.entities.photos.count
     },
     selected: {
       get() {
@@ -62,6 +92,9 @@ export default defineComponent({
           state.selected = value
         })
       }
+    },
+    scrollTop() {
+      return this.$store.state.entities.photos.scrollTop
     }
   }
 })
@@ -73,6 +106,11 @@ export default defineComponent({
   gap: 10px;
   transition: 0.5s ease-out;
   grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+}
+@media screen and (max-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)) !important;
+  }
 }
 .wrapper {
   display: flex;

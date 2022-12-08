@@ -5,6 +5,7 @@
 import { defineComponent } from 'vue'
 import User from '@/models/User'
 import axios from 'axios'
+import Photo from './models/Photo'
 
 export default defineComponent({
   name: 'App',
@@ -14,6 +15,8 @@ export default defineComponent({
       User.insert({ data: user.user })
       axios.defaults.headers.common['Authorization'] = `Bearer ${user.token}`
       console.log('user is authenticated, header is set')
+
+      Photo.stats()
     }
     console.log(process.env.VUE_APP_BASE_URL)
   }

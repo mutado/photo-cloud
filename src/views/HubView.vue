@@ -3,7 +3,7 @@
   <Header />
   <div class="content">
     <Sidebar class="sidebar" :class="{ open: sidebar }" />
-    <section>
+    <section ref="scroller" @scroll="onScroll">
       <router-view />
     </section>
   </div>
@@ -13,6 +13,7 @@
 <script lang="ts">
 import Header from '@/components/AppHeader.vue'
 import Sidebar from '@/components/AppSidebar.vue'
+import Photo from '@/models/Photo'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
@@ -24,6 +25,23 @@ export default defineComponent({
   computed: {
     sidebar() {
       return this.$store.state.entities.photos.sidebar
+    },
+    scrl() {
+      console.log(this.$refs.testing?.scrollTop)
+
+      return this.$refs.testing?.scrollTop ?? 0
+    }
+  },
+  data() {
+    return {
+      loadNextPage: false
+    }
+  },
+  methods: {
+    onScroll() {
+      Photo.commit((state) => {
+        state.scrollTop = this.$refs.scroller.scrollTop
+      })
     }
   }
 })

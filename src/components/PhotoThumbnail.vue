@@ -84,12 +84,11 @@ export default defineComponent({
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 3px solid transparent;
+  /*border: 3px solid transparent;*/
 }
 
 .thumbnail.selected {
-  border: 3px solid #2679fb;
-  border-radius: 4px;
+  outline: 3px solid #2679fb;
 }
 img {
   display: block;

@@ -23,10 +23,17 @@ export default class Photo extends Model {
 
   static state() {
     return {
-      zoom: 9,
+      zoom: 6,
+      page: 1,
+      photo: 0,
       center_image: true,
       sidebar: false,
-      selected: []
+      selected: [],
+      count: 0,
+      disk_used_percent: 0,
+      disk_used: 0,
+      disk_total: 0,
+      scrollTop: 0
     }
   }
 
@@ -50,8 +57,59 @@ export default class Photo extends Model {
     }
   }
 
-  static index() {
-    return this.api().get(process.env.VUE_APP_BASE_URL + '/api/photos')
+  static index(page: number) {
+    return this.api()
+      .get(process.env.VUE_APP_BASE_URL + '/api/photos', {
+        params: {
+          page: page
+        }
+      })
+      .then((response) => {
+        console.log('photos: ' + response.response.data.length)
+        Photo.commit((state) => {
+          state.page += 1
+          console.log('page: ' + state.page)
+        })
+        return response
+      })
+  }
+
+  static show(id: string) {
+    return this.api().get(process.env.VUE_APP_BASE_URL + '/api/photos/' + id)
+  }
+
+  static stats() {
+    return this.api()
+      .get(process.env.VUE_APP_BASE_URL + '/api/statistics/summary', {
+        save: false
+      })
+      .then((response) => {
+        Photo.commit((state) => {
+          state.count = response.response.data.photos
+          state.disk_used_percent =
+            response.response.data.disk_usage.used_percent
+          state.disk_used = response.response.data.disk_usage.used_size
+          state.disk_total = response.response.data.disk_usage.total_size
+        })
+        return response
+      })
+  }
+
+  static upload(file: File) {
+    const formData = new FormData()
+    formData.append('photo', file)
+    const headers = {
+      'Content-Type': 'multipart/form-data',
+      Accept: 'application/json'
+    }
+    return this.api()
+      .post(process.env.VUE_APP_BASE_URL + '/api/photos', formData, { headers })
+      .then((response) => {
+        Photo.commit((state) => {
+          state.count += 1
+        })
+        return response
+      })
   }
 
   // lazy load image
