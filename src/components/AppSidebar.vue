@@ -1,24 +1,47 @@
 <template>
   <aside>
+    <small class="color-secondary"><b>Photos</b></small>
     <v-button class="bar" sidebar to="/photos">
       <i class="bi bi-images"></i>
       Library
     </v-button>
     <v-button class="bar" sidebar>
+      <i class="bi bi-images"></i>
+      Places
+    </v-button>
+    <v-button class="bar" sidebar>
       <i class="bi bi-star-fill"></i>
       Favorites
     </v-button>
+    <v-button class="bar" sidebar>
+      <i class="bi bi-images"></i>
+      Recents
+    </v-button>
+    <v-button class="bar" sidebar>
+      <i class="bi bi-images"></i>
+      Deleted
+    </v-button>
+    <v-button class="bar" sidebar>
+      <i class="bi bi-images"></i>
+      Hidden
+    </v-button>
+
+    <small class="color-secondary"><b>Photos</b></small>
     <v-button class="bar" sidebar to="/albums">
       <i class="bi bi-folder-fill"></i>
-      Albums
+      My Albums
     </v-button>
     <v-button class="bar" sidebar>
       <i class="bi bi-people-fill"></i>
       Shared
     </v-button>
     <v-button class="bar" sidebar>
-      <i class="bi bi-person-circle"></i>
-      Account
+      <i class="bi bi-images"></i>
+      Videos
+    </v-button>
+    <v-button class="bar" sidebar>
+      <i class="bi bi-images"></i>
+      Photos
     </v-button>
   </aside>
 </template>
@@ -37,17 +60,17 @@ export default defineComponent({
 
 <style scoped>
 aside {
+  overflow-y: auto;
   width: 100%;
-  height: 85%;
-  background-color: rgba(247, 246, 246, 0.7);
-  border-radius: 30px;
-  padding: 20px;
-
+  height: 100%;
+  background-color: rgba(51, 51, 51, 0.99);
+  padding: 0 20px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  font-size: 0.9rem;
 }
-aside > * {
-  border-radius: 15px;
+small {
+  margin-top: 30px;
+  margin-bottom: 5px;
 }
 </style>

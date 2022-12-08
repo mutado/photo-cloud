@@ -1,7 +1,15 @@
+:root {
+  --color-primary: #eee;
+  --color-secondary: #ccc;
+  --color-tertiary: #aaa;
+}
+
 /* use viewport-relative units to cover page fully */
 body {
   height: 100vh;
   /* width: 100vw; */
+  color: white;
+  font-family: Helvetica, sans-serif;
 }
 
 /* include border and padding in element width and height */
@@ -20,27 +28,75 @@ div#app {
 
   /* example padding, font-size, background, etc */
   font-size: 20px;
-  background-image: url('/img/background.png');
+  /* background-image: url('/img/background.png'); */
+  background-color: gray;
   background-size: cover;
 }
 
 .v-button {
   display: inline-block;
-  padding: 14px 20px;
   font-size: 1.5rem;
-  font-weight: 600;
   cursor: pointer;
   border: 1px solid transparent;
+  background-color: transparent;
   transition: background-color 0.2s ease-in-out;
 }
 
 .v-button--sidebar {
+  color: var(--color-primary);
+  padding: 4px 15px;
+  font-size: 0.9rem;
+  border-radius: 10px;
   text-align: left;
   background-color: transparent;
 }
 .v-button--sidebar:hover {
-  background-color: rgba(247, 246, 246, 0.7);
+  /* background-color: rgba(247, 246, 246, 0.7); */
 }
 .v-button--sidebar.router-link-active {
-  background-color: rgba(195, 195, 195, 0.7);
+  background-color: rgba(238, 238, 238, 0.3);
+}
+
+.bi-light {
+  color: var(--color-secondary);
+}
+
+.color-secondary {
+  color: var(--color-secondary);
+}
+.color-primary {
+  color: var(--color-primary);
+}
+.color-tertiary {
+  color: var(--color-tertiary);
+}
+
+.cut-text {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.thumbnail-image,
+.skeleton {
+  background: linear-gradient(0.25turn, #353535 25%, #474747 50%, #353535 75%);
+  /* background: linear-gradient(0.25turn, transparent, #474747, transparent),
+    linear-gradient(#353535, #353535); */
+  background-repeat: repeat-y;
+  background-size: 400% 400%;
+  background-position: 0 0;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+.skeleton.stop {
+  animation: none;
+}
+
+@keyframes skeleton-loading {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 100% 0;
+  }
 }

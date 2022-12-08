@@ -1,4 +1,5 @@
 <template>
+  <router-link to="/photos">photos</router-link>
   <div class="about">
     <h1>This is an about page</h1>
     <input
@@ -12,34 +13,34 @@
 </template>
 
 <script>
-import { file } from "@babel/types";
-import axios from "axios";
-import { defineComponent } from "vue";
+import { file } from '@babel/types'
+import axios from 'axios'
+import { defineComponent } from 'vue'
+import Photo from '@/models/Photo'
 
 export default defineComponent({
   data() {
     return {
-      image: null,
-    };
+      image: null
+    }
   },
   methods: {
     uploadImage() {
-      this.image = this.$refs.file.files[0];
+      this.image = this.$refs.file.files[0]
     },
     submitImage() {
-      const formData = new FormData();
-      formData.append("photo", this.image);
-      const headers = {
-        "Content-Type": "multipart/form-data",
-        Accept: "application/json",
-      };
-      axios
-        .post("http://167.172.172.251/api/photos", formData, { headers })
-        .then((res) => {
-          res.data.files;
-          res.status;
-        });
-    },
-  },
-});
+      Photo.upload(this.image)
+      // const formData = new FormData();
+      // formData.append('photo', this.image);
+      // const headers = {
+      //   'Content-Type': 'multipart/form-data',
+      //   'Accept': 'application/json'
+      // };
+      // axios.post('http://167.172.172.251/api/photos', formData, { headers }).then((res) => {
+      //   res.data.files;
+      //   res.status;
+      // });
+    }
+  }
+})
 </script>
