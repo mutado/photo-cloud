@@ -14,7 +14,9 @@
         :key="photo.id"
         :photo_id="photo.id"
         :class="{ selected: selected.includes(photo.id) }"
-        @click="select(photo.id)"
+        @click.exact="selected = [photo.id]"
+        @click.meta.exact="addToSelection(photo.id)"
+        @click.shift.exact="selectMultiple(photo.id)"
       />
     </div>
     <photo-stats ref="stats" />
@@ -52,13 +54,26 @@ export default defineComponent({
       this.$refs.container.parentElement.scrollTop =
         this.$refs.container.parentElement.scrollHeight
     },
-    select(id: string) {
+    addToSelection(id: string, removeOnOverlap = true) {
       if (this.selected.includes(id)) {
-        this.selected = this.selected.filter((i: string) => i != id)
+        if (removeOnOverlap)
+          this.selected = this.selected.filter((i: string) => i != id)
       } else {
         this.selected.push(id)
       }
-      console.log(this.selected)
+    },
+    selectMultiple(id: string) {
+      // select all photos between the last selected photo and the current photo
+      const start = this.photos.findIndex(
+        (photo) => photo.id == this.selected[this.selected.length - 1]
+      )
+      let end = this.photos.findIndex((photo) => photo.id == id)
+      if (end > start) end += 1
+      const test = this.photos.slice(Math.min(start, end), Math.max(start, end))
+
+      test.forEach((photo) => {
+        this.addToSelection(photo.id, false)
+      })
     }
   },
   watch: {
