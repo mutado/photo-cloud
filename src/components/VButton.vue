@@ -9,8 +9,7 @@
         'v-button--danger': danger,
         'v-button--disabled': disabled,
         'v-button--sidebar': sidebar,
-        'router-link-active':
-          to != '' ? $route.matched.some(({ path }) => path === to) : false
+        'router-link-active': routeMatched
       }
     ]"
     :disabled="disabled"
@@ -50,8 +49,8 @@ export default defineComponent({
       default: false
     },
     to: {
-      type: String,
-      default: ''
+      type: [Object, String],
+      default: null
     }
   },
   methods: {
@@ -60,6 +59,21 @@ export default defineComponent({
         this.$router.push(this.to)
       }
       this.$emit('click')
+    }
+  },
+  computed: {
+    routeMatched() {
+      if (!this.to) return false
+
+      if (this.to instanceof String) {
+        return this.$route.matched.some(({ path }) => path === this.to)
+      } else if (this.to instanceof Object) {
+        return this.$route.matched.some(
+          ({ name }) => name === (this.to as any).name
+        )
+      }
+
+      return this.$route.path === this.to
     }
   }
 })

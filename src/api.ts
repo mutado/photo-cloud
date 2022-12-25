@@ -1,6 +1,6 @@
 import axios from 'axios'
 import User from './models/User'
-const MAX_REQUESTS_COUNT = 3
+const MAX_REQUESTS_COUNT = 10
 const INTERVAL_MS = 10
 let PENDING_REQUESTS = 0
 // create new axios instance

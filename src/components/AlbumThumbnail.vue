@@ -1,6 +1,6 @@
 <template>
-  <div class="album" @click="onClick">
-    <picture class="skeleton" :class="{ stop: !loading }">
+  <div class="album">
+    <picture class="skeleton" :class="{ stop: !loading }" @dblclick="open">
       <svg
         v-if="!photo || !photo.thumbnail_loaded"
         xmlns="http://www.w3.org/2000/svg"
@@ -16,8 +16,17 @@
       </svg>
       <img v-else :src="photo?.thumbnail" @load="loading = false" />
     </picture>
-    <div class="cut-text">
-      {{ folder?.name }}
+    <div class="cut-text" v-if="!edit" @click="rename">
+      {{ folder.name }}
+    </div>
+    <div class="cut-text" v-else>
+      <input
+        ref="nameEdit"
+        type="text"
+        v-model="folder.name"
+        @blur="save"
+        @keydown.enter="save"
+      />
     </div>
     <small class="color-tertiary">{{ folder?.photos_count }}</small>
   </div>
@@ -37,7 +46,8 @@ export default defineComponent({
   },
   data() {
     return {
-      loading: true
+      loading: true,
+      edit: false
     }
   },
   mounted() {
@@ -63,21 +73,49 @@ export default defineComponent({
     }
   },
   methods: {
-    onClick() {
-      console.log(this.folder)
-      console.log(this.photo)
+    rename() {
+      this.edit = true
+      this.$nextTick(() => {
+        this.$refs.nameEdit.focus()
+      })
+    },
+    save() {
+      this.edit = false
+      if (!this.folder) return
+      if (this.folder.name === '') {
+        this.folder.name = 'Untitled'
+      }
+      if (this.folder.user_id === null)
+        Folder.post({
+          name: this.folder.name
+        }).then((response) => {
+          this.folder?.$delete()
+        })
+      else
+        Folder.put(this.folder_id, {
+          name: this.folder.name
+        })
+    },
+    open() {
+      this.$router.push({ name: 'album', params: { id: this.folder_id } })
     }
   }
 })
 </script>
 <style scoped>
+.album {
+  padding: 3px;
+}
 .skeleton {
   aspect-ratio: 1/1;
-  width: 100%;
-  border-radius: 5px;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.album.selected .skeleton {
+  outline: 3px solid #2679fb !important;
 }
 .skeleton svg {
   width: 50%;
@@ -85,6 +123,7 @@ export default defineComponent({
   fill: var(--color-tertiary);
 }
 .skeleton img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -102,5 +141,14 @@ small {
 .cut-text {
   margin-top: 15px;
   width: 100%;
+}
+
+input {
+  height: 23px;
+  width: 100%;
+  text-align: center;
+  background: transparent;
+  color: white;
+  outline: 3px solid #2679fb;
 }
 </style>
