@@ -17,6 +17,7 @@
         @click.exact="selected = [photo.id]"
         @click.meta.exact="addToSelection(photo.id)"
         @click.shift.exact="selectMultiple(photo.id)"
+        @dblclick="openPhoto(photo.id)"
       />
     </div>
     <photo-stats ref="stats" />
@@ -27,6 +28,7 @@ import PhotoThumbnail from '@/components/PhotoThumbnail.vue'
 import Photo from '@/models/Photo'
 import PhotoStats from '@/components/PhotoStats.vue'
 import { defineComponent } from 'vue'
+import router from '@/router'
 
 export default defineComponent({
   components: { PhotoThumbnail, PhotoStats },
@@ -74,6 +76,9 @@ export default defineComponent({
       test.forEach((photo) => {
         this.addToSelection(photo.id, false)
       })
+    },
+    openPhoto(id: string) {
+      router.push('/photos/' + id)
     }
   },
   watch: {
