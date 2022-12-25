@@ -38,7 +38,7 @@
         <v-button>
           <i class="bi bi-light bi-box-arrow-up"></i>
         </v-button>
-        <v-button>
+        <v-button :to="'/delete'">
           <i class="bi bi-light bi-trash3"></i>
         </v-button>
       </div>

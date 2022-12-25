@@ -16,6 +16,12 @@ const routes: Array<RouteRecordRaw> = [
       import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
   },
   {
+    path: '/delete',
+    name: 'delete',
+    component: () =>
+      import(/* webpackChunkName: "delete" */ '../views/DeleteView.vue')
+  },
+  {
     path: '/photos',
     component: HubView,
     beforeEnter: [authGuard],
