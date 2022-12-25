@@ -1,5 +1,6 @@
 import { Model } from '@vuex-orm/core'
 import FolderPhoto from './FolderPhoto'
+import Photo from './Photo'
 
 export default class Folder extends Model {
   static entity = 'folders'
@@ -20,6 +21,7 @@ export default class Folder extends Model {
   updated_at!: string
 
   photo_references: FolderPhoto[] = []
+  photos: Photo[] = []
 
   static fields() {
     return {
@@ -30,11 +32,29 @@ export default class Folder extends Model {
       created_at: this.attr(''),
       updated_at: this.attr(''),
 
-      photo_references: this.hasMany(FolderPhoto, 'folder_id')
+      photo_references: this.hasMany(FolderPhoto, 'folder_id'),
+      photos: this.hasManyThrough(Photo, FolderPhoto, 'folder_id', 'photo_id')
     }
   }
 
   static index() {
     return this.api().get(process.env.VUE_APP_BASE_URL + '/api/folders')
+  }
+
+  static show(folder_id: string) {
+    return this.api().get(
+      process.env.VUE_APP_BASE_URL + '/api/folders/' + folder_id
+    )
+  }
+
+  static put(folder_id: string, data: any) {
+    return this.api().put(
+      process.env.VUE_APP_BASE_URL + '/api/folders/' + folder_id,
+      data
+    )
+  }
+
+  static post(data: any) {
+    return this.api().post(process.env.VUE_APP_BASE_URL + '/api/folders', data)
   }
 }
