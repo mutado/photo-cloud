@@ -4,42 +4,10 @@
       <img src="@/assets/logo@1x.svg" alt="logo" />
       <h1>PhotoCloud</h1>
     </div>
-    <div class="buttons">
-      <div class="render">
-        <v-button>
-          <i
-            v-if="aspectRatio"
-            @click="aspectRatio = false"
-            class="bi bi-light bi-arrows-angle-contract"
-          ></i>
-          <i
-            v-else
-            @click="aspectRatio = true"
-            class="bi bi-light bi-arrows-angle-expand"
-          ></i>
-        </v-button>
-        <v-range v-model="zoom" :min="3" :max="9" :step="0.1" />
-      </div>
+    <div class="buttons" id="toolbar">
       <div class="sidebar-toggle">
         <v-button @click="sidebar = !sidebar">
           <i class="bi bi-light bi-layout-sidebar"></i>
-        </v-button>
-      </div>
-      <div class="headerChild">
-        <v-button :to="'/about'">
-          <i class="bi bi-light bi-cloud-upload"></i>
-        </v-button>
-        <v-button>
-          <i class="bi bi-light bi-folder-plus"></i>
-        </v-button>
-        <v-button>
-          <i class="bi bi-light bi-heart"></i>
-        </v-button>
-        <v-button>
-          <i class="bi bi-light bi-box-arrow-up"></i>
-        </v-button>
-        <v-button>
-          <i class="bi bi-light bi-trash3"></i>
         </v-button>
       </div>
     </div>
@@ -47,46 +15,22 @@
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
-import VRange from '@/components/VRange.vue'
 import VButton from '@/components/VButton.vue'
 import Photo from '@/models/Photo'
 
 export default defineComponent({
   name: 'AppHeader',
   components: {
-    VRange,
     VButton
   },
   computed: {
-    zoom: {
-      get() {
-        return this.$store.state.entities.photos.zoom
-      },
-      set(value) {
-        let r = Math.round(value)
-        if (r != this.zoom)
-          Photo.commit((state) => {
-            state.zoom = value
-          })
-      }
-    },
     sidebar: {
       get() {
         return this.$store.state.entities.photos.sidebar
       },
-      set(value) {
+      set(value: Boolean) {
         Photo.commit((state) => {
           state.sidebar = value
-        })
-      }
-    },
-    aspectRatio: {
-      get() {
-        return this.$store.state.entities.photos.center_image
-      },
-      set(value) {
-        Photo.commit((state) => {
-          state.center_image = value
         })
       }
     }

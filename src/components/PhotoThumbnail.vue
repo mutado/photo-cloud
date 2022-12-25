@@ -90,6 +90,7 @@ export default defineComponent({
 .thumbnail.selected {
   outline: 3px solid #2679fb;
 }
+
 img {
   display: block;
   transition: 0.3s ease-out;
