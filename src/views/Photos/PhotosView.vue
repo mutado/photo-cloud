@@ -14,7 +14,7 @@
       <v-button :disabled="!selected.length">
         <i class="bi bi-light bi-box-arrow-up"></i>
       </v-button>
-      <v-button :disabled="!selected.length">
+      <v-button @click="deletePhotos" :disabled="!selected.length">
         <i class="bi bi-light bi-trash3"></i>
       </v-button>
     </div>
@@ -28,7 +28,7 @@
         v-selectable:[photo.id]="{
           getItems: getPhotoIds,
           setSelection: setSelection,
-          getSelection: getSelection
+          getSelection: getSelection,
         }"
         :class="{ selected: selected.includes(photo.id) }"
         @dblclick="openPhoto(photo.id)"
@@ -38,15 +38,16 @@
   </div>
 </template>
 <script lang="ts">
-import PhotoThumbnail from '@/components/PhotoThumbnail.vue'
-import VButton from '@/components/VButton.vue'
-import Photo from '@/models/Photo'
-import PhotoStats from '@/components/PhotoStats.vue'
-import ZoomControl from '@/components/ZoomControl.vue'
-import ItemsGrid from '@/components/ItemsGrid.vue'
-import VSelectable from '@/components/VSelectable.vue'
-import { defineComponent } from 'vue'
-import router from '@/router'
+import PhotoThumbnail from "@/components/PhotoThumbnail.vue";
+import VButton from "@/components/VButton.vue";
+import Photo from "@/models/Photo";
+import PhotoStats from "@/components/PhotoStats.vue";
+import ZoomControl from "@/components/ZoomControl.vue";
+import ItemsGrid from "@/components/ItemsGrid.vue";
+import VSelectable from "@/components/VSelectable.vue";
+import { defineComponent } from "vue";
+import router from "@/router";
+import axios from "axios";
 
 export default defineComponent({
   components: {
@@ -55,73 +56,84 @@ export default defineComponent({
     ZoomControl,
     VButton,
     ItemsGrid,
-    VSelectable
+    VSelectable,
   },
   data() {
     return {
       imgs: [],
       imageAdded: false,
-      inputMessageText: '',
+      inputMessageText: "",
       loadingHandler: null as any,
-      selected: [] as string[]
-    }
+      selected: [] as string[],
+    };
   },
   mounted() {
     this.loadMore().then(() => {
-      this.scrollToBottom()
-    })
-    this.scrollToBottom()
+      this.scrollToBottom();
+    });
+    this.scrollToBottom();
   },
   methods: {
     setSelection(selected: string[]) {
-      this.selected = selected
+      this.selected = selected;
     },
     getSelection() {
-      return this.selected
+      return this.selected;
     },
     getPhotoIds() {
-      return this.photos?.map((photo: any) => photo.id)
+      return this.photos?.map((photo: any) => photo.id);
     },
     loadMore() {
       return (this.loadingHandler = Photo.index(this.photoPage).then(() => {
-        this.loadingHandler = null
-      }))
+        this.loadingHandler = null;
+      }));
     },
     scrollToBottom() {
       this.$refs.container.parentElement.scrollTop =
-        this.$refs.container.parentElement.scrollHeight
+        this.$refs.container.parentElement.scrollHeight;
     },
     openPhoto(id: string) {
-      router.push('/photos/' + id)
-    }
+      router.push("/photos/" + id);
+    },
+    deletePhotos() {
+      if (confirm("Are you sure you want to delete selected photos?")) {
+        this.getSelection().forEach((photo: string) => {
+          axios
+            .delete("http://167.172.172.251/api/photos/" + photo)
+            .then(() => {
+              location.reload();
+            });
+        });
+      }
+    },
   },
   watch: {
     scrollTop(val) {
-      console.log('scrolltop', val)
+      console.log("scrolltop", val);
       if (val < 100 && this.loadingHandler == null) {
-        console.log(this.photoPage)
+        console.log(this.photoPage);
 
-        console.log('loading more')
-        this.loadMore()
+        console.log("loading more");
+        this.loadMore();
       }
-    }
+    },
   },
   computed: {
-    photos: () => Photo.query().orderBy('created_at', 'desc').get(),
+    photos: () => Photo.query().orderBy("created_at", "desc").get(),
     zoom() {
-      return Math.floor(this.$store.state.entities.photos.zoom)
+      return Math.floor(this.$store.state.entities.photos.zoom);
     },
     photoPage() {
-      return this.$store.state.entities.photos.page
+      return this.$store.state.entities.photos.page;
     },
     photoCount() {
-      return this.$store.state.entities.photos.count
+      return this.$store.state.entities.photos.count;
     },
     scrollTop() {
-      return this.$store.state.entities.photos.scrollTop
-    }
-  }
-})
+      return this.$store.state.entities.photos.scrollTop;
+    },
+  },
+});
 </script>
 <style scoped>
 .grid {
