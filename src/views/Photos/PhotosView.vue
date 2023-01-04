@@ -2,7 +2,7 @@
   <teleport to="#toolbar">
     <zoom-control aspect-ratio />
     <div class="headerChild">
-      <v-button :to="'/about'">
+      <v-button @click="choosePhotos">
         <i class="bi bi-light bi-cloud-upload"></i>
       </v-button>
       <v-button :disabled="!selected.length">
@@ -35,6 +35,14 @@
       />
     </items-grid>
     <photo-stats ref="stats" />
+    <input
+    @input="submitPhotos"
+    id="fileUpload"
+    type="file"
+    ref="fileUpload"
+    accept="image/png, image/jpeg"
+    hidden
+  />
   </div>
 </template>
 <script lang="ts">
@@ -94,6 +102,13 @@ export default defineComponent({
     },
     openPhoto(id: string) {
       router.push("/photos/" + id);
+    },
+    choosePhotos() {
+      document.getElementById("fileUpload")!.click();
+    },
+    submitPhotos() {
+      Photo.upload(this.$refs.fileUpload.files[0])
+      this.$refs.fileUpload.value = null
     },
     deletePhotos() {
       if (confirm("Are you sure you want to delete selected photos?")) {
