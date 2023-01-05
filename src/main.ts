@@ -6,10 +6,13 @@ import store from './store'
 import 'normalize.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import { ObserveVisibility } from 'vue-observe-visibility'
+import FloatingVue from 'floating-vue'
+import 'floating-vue/dist/style.css'
 
 createApp(App)
   .use(store)
   .use(router)
+  .use(FloatingVue)
   .directive('observe-visibility', {
     beforeMount: (el, binding, node) => {
       ;(node as any).context = binding.instance

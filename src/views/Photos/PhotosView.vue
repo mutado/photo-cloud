@@ -5,7 +5,7 @@
       <v-button @click="choosePhotos">
         <i class="bi bi-light bi-cloud-upload"></i>
       </v-button>
-      <v-button :disabled="!selected.length">
+      <v-button @click="addToFolder" :disabled="!selected.length">
         <i class="bi bi-light bi-folder-plus"></i>
       </v-button>
       <v-button :disabled="!selected.length">
@@ -14,9 +14,31 @@
       <v-button :disabled="!selected.length">
         <i class="bi bi-light bi-box-arrow-up"></i>
       </v-button>
-      <v-button @click="deletePhotos" :disabled="!selected.length">
-        <i class="bi bi-light bi-trash3"></i>
-      </v-button>
+      <VDropdown>
+        <v-button :disabled="!selected.length">
+          <i class="bi bi-light bi-trash3"></i>
+        </v-button>
+        <template #popper>
+          <div class="popperContainer">
+            <div class="popperMessage">
+              Are you sure you want to delete these albums?
+            </div>
+            <div class="popperButtons">
+              <button
+                @click="deletePhotos"
+                v-close-popper
+                class="popperButton"
+                id="yes"
+              >
+                Yes
+              </button>
+              <button v-close-popper class="popperButton" id="cancel">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </template>
+      </VDropdown>
     </div>
   </teleport>
   <div class="wrapper" ref="container">
@@ -36,13 +58,13 @@
     </items-grid>
     <photo-stats ref="stats" />
     <input
-    @input="submitPhotos"
-    id="fileUpload"
-    type="file"
-    ref="fileUpload"
-    accept="image/png, image/jpeg"
-    hidden
-  />
+      @input="submitPhotos"
+      id="fileUpload"
+      type="file"
+      ref="fileUpload"
+      accept="image/png, image/jpeg"
+      hidden
+    />
   </div>
 </template>
 <script lang="ts">
@@ -107,19 +129,15 @@ export default defineComponent({
       document.getElementById("fileUpload")!.click();
     },
     submitPhotos() {
-      Photo.upload(this.$refs.fileUpload.files[0])
-      this.$refs.fileUpload.value = null
+      Photo.upload(this.$refs.fileUpload.files[0]);
+      this.$refs.fileUpload.value = null;
     },
+    addToFolder() {},
     deletePhotos() {
-      if (confirm("Are you sure you want to delete selected photos?")) {
-        this.getSelection().forEach((photo: string) => {
-          axios
-            .delete("http://167.172.172.251/api/photos/" + photo)
-            .then(() => {
-              location.reload();
-            });
-        });
-      }
+      this.getSelection().forEach((photo: string) => {
+        Photo.destroy(photo);
+      });
+      location.reload();
     },
   },
   watch: {
@@ -171,5 +189,31 @@ export default defineComponent({
 }
 photo-stats {
   margin-top: auto;
+}
+
+.headerChild {
+  display: flex;
+  flex-direction: row;
+}
+.popperContainer {
+  padding-top: 2%;
+}
+.popperButtons {
+  padding: 2%;
+}
+.popperButton {
+  width: 48%;
+  margin: 1%;
+  padding: 1.5%;
+  border-radius: 10px;
+  border: 0px;
+}
+#yes {
+  background-color: #171717;
+  color: #eeeeee;
+}
+#cancel {
+  background-color: #171717;
+  color: #eeeeee;
 }
 </style>
