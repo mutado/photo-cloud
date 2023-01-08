@@ -13,13 +13,12 @@
     "axios": "^1.2.0",
     "bootstrap-icons": "^1.10.2",
     "core-js": "^3.8.3",
+    "intersection-observer": "^0.12.2",
     "normalize.css": "^8.0.1",
     "register-service-worker": "^1.7.2",
     "uuid": "^9.0.0",
     "vue": "^3.2.13",
-    "vue-observe-visibility": "^1.0.0",
     "vue-router": "^4.0.3",
-    "vue3-observe-visibility": "^0.1.2",
     "vuex": "^4.0.0"
   },
   "devDependencies": {

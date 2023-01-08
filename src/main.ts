@@ -5,19 +5,12 @@ import router from './router'
 import store from './store'
 import 'normalize.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
-import { ObserveVisibility } from 'vue-observe-visibility'
+import 'intersection-observer'
 
 createApp(App)
   .use(store)
   .use(router)
-  .directive('observe-visibility', {
-    beforeMount: (el, binding, node) => {
-      ;(node as any).context = binding.instance
-      ObserveVisibility.bind(el, binding, node)
-    },
-    updated: ObserveVisibility.update,
-    unmounted: ObserveVisibility.unbind
-  })
+  .use(Hotkeys)
   .directive('selectable', {
     mounted(el, binding, node) {
       const addToSelection = (
