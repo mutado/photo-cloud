@@ -1,6 +1,6 @@
 <template>
   <teleport to="#toolbar">
-    <zoom-control />
+    <zoom-control aspect-ratio />
     <div class="headerChild">
       <v-button :to="'/about'">
         <i class="bi bi-light bi-cloud-upload"></i>
