@@ -6,8 +6,11 @@ import store from './store'
 import 'normalize.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import 'intersection-observer'
+import Modal from './plugins/modal'
+import Hotkeys from './plugins/hotkeys'
 
-createApp(App)
+const app = createApp(App)
+app
   .use(store)
   .use(router)
   .use(Hotkeys)
@@ -29,6 +32,8 @@ createApp(App)
 
       el.addEventListener('mousedown', (e: any) => {
         if (e.button !== 0) return
+
+        if (!binding.value.isEnabled()) return
 
         let selected = binding.value.getSelection() as string[]
         if (e.metaKey || e.ctrlKey) {
@@ -60,3 +65,5 @@ createApp(App)
     }
   })
   .mount('#app')
+
+app.use(Modal)
