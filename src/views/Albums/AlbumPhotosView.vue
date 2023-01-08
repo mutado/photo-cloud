@@ -98,7 +98,7 @@ export default defineComponent({
     },
     deletePhotos() {
       this.getSelection().forEach((reference_id: string) => {
-        Folder.destroyPhoto(this.folderId, reference_id)
+        Folder.destroyPhotoReference(this.folderId, reference_id)
       });
       location.reload();
     }
