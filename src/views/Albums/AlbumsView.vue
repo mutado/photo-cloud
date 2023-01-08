@@ -101,7 +101,6 @@ export default defineComponent({
       this.getSelection().forEach((album) => {
         Folder.destroy(album)
       })
-      location.reload()
     }
   }
 })

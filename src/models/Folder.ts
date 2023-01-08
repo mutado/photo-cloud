@@ -60,17 +60,10 @@ export default class Folder extends Model {
 
   static destroy(folder_id: string) {
     return this.api().delete(
-      process.env.VUE_APP_BASE_URL + '/api/folders/' + folder_id
-    )
-  }
-
-  static destroyPhotoReference(folder_id: string, reference_id: string) {
-    return this.api().delete(
-      process.env.VUE_APP_BASE_URL +
-        '/api/folders/' +
-        folder_id +
-        '/references/' +
-        reference_id
+      process.env.VUE_APP_BASE_URL + '/api/folders/' + folder_id,
+      {
+        delete: folder_id
+      }
     )
   }
 }

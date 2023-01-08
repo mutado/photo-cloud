@@ -162,7 +162,6 @@ export default defineComponent({
       this.getSelection().forEach((photo_id: string) => {
         Photo.destroy(photo_id)
       })
-      location.reload()
     }
   },
   watch: {
@@ -247,7 +246,7 @@ photo-stats {
 }
 
 .popFoldersMessage {
-  padding-top: 2% ;
+  padding-top: 2%;
 }
 .popFolders {
   border: #171717 solid 1px;

@@ -98,9 +98,8 @@ export default defineComponent({
     },
     deletePhotos() {
       this.getSelection().forEach((reference_id: string) => {
-        Folder.destroyPhotoReference(this.folderId, reference_id)
-      });
-      location.reload();
+        FolderPhoto.destroy(this.folderId, reference_id)
+      })
     }
   },
   mounted() {
@@ -109,15 +108,15 @@ export default defineComponent({
     })
   },
   computed: {
-    folderId():string {
+    folderId(): string {
       return this.$route.params.id as string
     },
-    photoReferences():FolderPhoto[]|undefined {
+    photoReferences(): FolderPhoto[] | undefined {
       return this.folder?.photo_references
     },
-    folder():Item<Folder> {
+    folder(): Item<Folder> {
       return Folder.query().with('photo_references').find(this.folderId)
-    },
+    }
   },
   watch: {
     folderId() {
@@ -166,4 +165,5 @@ export default defineComponent({
 #popDeleteCancel {
   background-color: #171717;
   color: #eeeeee;
-}</style>
+}
+</style>
