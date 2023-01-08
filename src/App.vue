@@ -10,6 +10,11 @@ import Folder from './models/Folder'
 
 export default defineComponent({
   name: 'App',
+  data() {
+    return {
+      loaded: false
+    }
+  },
   mounted() {
     if (User.isAuthenticated()) {
       let user = User.me()
@@ -17,9 +22,9 @@ export default defineComponent({
       axios.defaults.headers.common['Authorization'] = `Bearer ${user.token}`
       console.log('user is authenticated, header is set')
 
-      Photo.stats()
-      Folder.index()
-      Photo.index(1)
+      Promise.all([Photo.stats(), Folder.index(), Photo.index(1)]).then(() => {
+        this.loaded = true
+      })
     }
     console.log(process.env.VUE_APP_BASE_URL)
   }
