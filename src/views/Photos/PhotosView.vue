@@ -5,9 +5,24 @@
       <v-button @click="choosePhotos">
         <i class="bi bi-light bi-cloud-upload"></i>
       </v-button>
-      <v-button @click="addToFolder" :disabled="!selected.length">
-        <i class="bi bi-light bi-folder-plus"></i>
-      </v-button>
+      <VDropdown>
+        <v-button :disabled="!selected.length">
+          <i class="bi bi-light bi-folder-plus"></i>
+        </v-button>
+        <template #popper>
+          <div class="popFoldersMessage">Add photos to folder</div>
+          <div
+            class="popFolders"
+            ref="folder"
+            v-for="(folder, index) in folders"
+            @click="addToFolder(index)"
+            v-close-popper
+          >
+            <i class="bi bi-collection"></i>
+            {{ folder.name }}
+          </div>
+        </template>
+      </VDropdown>
       <v-button :disabled="!selected.length">
         <i class="bi bi-light bi-heart"></i>
       </v-button>
@@ -19,20 +34,24 @@
           <i class="bi bi-light bi-trash3"></i>
         </v-button>
         <template #popper>
-          <div class="popperContainer">
-            <div class="popperMessage">
-              Are you sure you want to delete these albums?
+          <div class="popDeleteContainer">
+            <div class="popDeleteMessage">
+              Are you sure you want to delete these photos?
             </div>
-            <div class="popperButtons">
+            <div class="popDeleteButtons">
               <button
                 @click="deletePhotos"
                 v-close-popper
-                class="popperButton"
-                id="yes"
+                class="popDeleteButton"
+                id="popDeleteYes"
               >
                 Yes
               </button>
-              <button v-close-popper class="popperButton" id="cancel">
+              <button
+                v-close-popper
+                class="popDeleteButton"
+                id="popDeleteCancel"
+              >
                 Cancel
               </button>
             </div>
@@ -50,7 +69,7 @@
         v-selectable:[photo.id]="{
           getItems: getPhotoIds,
           setSelection: setSelection,
-          getSelection: getSelection,
+          getSelection: getSelection
         }"
         :class="{ selected: selected.includes(photo.id) }"
         @dblclick="openPhoto(photo.id)"
@@ -68,16 +87,17 @@
   </div>
 </template>
 <script lang="ts">
-import PhotoThumbnail from "@/components/PhotoThumbnail.vue";
-import VButton from "@/components/VButton.vue";
-import Photo from "@/models/Photo";
-import PhotoStats from "@/components/PhotoStats.vue";
-import ZoomControl from "@/components/ZoomControl.vue";
-import ItemsGrid from "@/components/ItemsGrid.vue";
-import VSelectable from "@/components/VSelectable.vue";
-import { defineComponent } from "vue";
-import router from "@/router";
-import axios from "axios";
+import PhotoThumbnail from '@/components/PhotoThumbnail.vue'
+import VButton from '@/components/VButton.vue'
+import Photo from '@/models/Photo'
+import PhotoStats from '@/components/PhotoStats.vue'
+import ZoomControl from '@/components/ZoomControl.vue'
+import ItemsGrid from '@/components/ItemsGrid.vue'
+import VSelectable from '@/components/VSelectable.vue'
+import { defineComponent } from 'vue'
+import router from '@/router'
+import Folder from '@/models/Folder'
+import FolderPhoto from '@/models/FolderPhoto'
 
 export default defineComponent({
   components: {
@@ -86,87 +106,95 @@ export default defineComponent({
     ZoomControl,
     VButton,
     ItemsGrid,
-    VSelectable,
+    VSelectable
   },
   data() {
     return {
       imgs: [],
       imageAdded: false,
-      inputMessageText: "",
+      inputMessageText: '',
       loadingHandler: null as any,
-      selected: [] as string[],
-    };
+      selected: [] as string[]
+    }
   },
   mounted() {
     this.loadMore().then(() => {
-      this.scrollToBottom();
-    });
-    this.scrollToBottom();
+      this.scrollToBottom()
+    })
+    this.scrollToBottom()
+    Folder.index()
   },
   methods: {
     setSelection(selected: string[]) {
-      this.selected = selected;
+      this.selected = selected
     },
     getSelection() {
-      return this.selected;
+      return this.selected
     },
     getPhotoIds() {
-      return this.photos?.map((photo: any) => photo.id);
+      return this.photos?.map((photo: any) => photo.id)
     },
     loadMore() {
       return (this.loadingHandler = Photo.index(this.photoPage).then(() => {
-        this.loadingHandler = null;
-      }));
+        this.loadingHandler = null
+      }))
     },
     scrollToBottom() {
       this.$refs.container.parentElement.scrollTop =
-        this.$refs.container.parentElement.scrollHeight;
+        this.$refs.container.parentElement.scrollHeight
     },
     openPhoto(id: string) {
-      router.push("/photos/" + id);
+      router.push('/photos/' + id)
     },
     choosePhotos() {
-      document.getElementById("fileUpload")!.click();
+      document.getElementById('fileUpload')!.click()
     },
     submitPhotos() {
-      Photo.upload(this.$refs.fileUpload.files[0]);
-      this.$refs.fileUpload.value = null;
+      Photo.upload(this.$refs.fileUpload.files[0])
+      this.$refs.fileUpload.value = null
     },
-    addToFolder() {},
+    addToFolder(index: number) {
+      this.getSelection().forEach((photo_id: string) => {
+        FolderPhoto.post(this.folders[index].id, photo_id)
+      })
+    },
     deletePhotos() {
-      this.getSelection().forEach((photo: string) => {
-        Photo.destroy(photo);
-      });
-      location.reload();
-    },
+      this.getSelection().forEach((photo_id: string) => {
+        Photo.destroy(photo_id)
+      })
+      location.reload()
+    }
   },
   watch: {
     scrollTop(val) {
-      console.log("scrolltop", val);
+      console.log('scrolltop', val)
       if (val < 100 && this.loadingHandler == null) {
-        console.log(this.photoPage);
+        console.log(this.photoPage)
 
-        console.log("loading more");
-        this.loadMore();
+        console.log('loading more')
+        this.loadMore()
       }
-    },
+    }
   },
   computed: {
-    photos: () => Photo.query().orderBy("created_at", "desc").get(),
+    photos: () => Photo.query().orderBy('created_at', 'desc').get(),
+    folders() {
+      return Folder.all()
+    },
     zoom() {
-      return Math.floor(this.$store.state.entities.photos.zoom);
+      return Math.floor(this.$store.state.entities.photos.zoom)
     },
     photoPage() {
-      return this.$store.state.entities.photos.page;
+      return this.$store.state.entities.photos.page
     },
     photoCount() {
-      return this.$store.state.entities.photos.count;
+      return this.$store.state.entities.photos.count
     },
     scrollTop() {
-      return this.$store.state.entities.photos.scrollTop;
-    },
-  },
-});
+      return this.$store.state.entities.photos.scrollTop
+    }
+  }
+})
 </script>
 <style scoped>
 .grid {
@@ -195,25 +223,36 @@ photo-stats {
   display: flex;
   flex-direction: row;
 }
-.popperContainer {
+
+.popDeleteContainer {
   padding-top: 2%;
 }
-.popperButtons {
+.popDeleteButtons {
   padding: 2%;
 }
-.popperButton {
+.popDeleteButton {
   width: 48%;
   margin: 1%;
   padding: 1.5%;
   border-radius: 10px;
   border: 0px;
 }
-#yes {
+#popDeleteYes {
   background-color: #171717;
   color: #eeeeee;
 }
-#cancel {
+#popDeleteCancel {
   background-color: #171717;
   color: #eeeeee;
+}
+
+.popFoldersMessage {
+  padding-top: 2% ;
+}
+.popFolders {
+  border: #171717 solid 1px;
+  border-radius: 5px;
+  margin: 1%;
+  padding: 1%;
 }
 </style>
