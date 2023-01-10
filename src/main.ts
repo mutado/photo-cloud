@@ -5,6 +5,8 @@ import router from './router'
 import store from './store'
 import 'normalize.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
+import FloatingVue from 'floating-vue'
+import 'floating-vue/dist/style.css'
 import 'intersection-observer'
 import Modal from './plugins/modal'
 import Hotkeys from './plugins/hotkeys'
@@ -13,6 +15,7 @@ const app = createApp(App)
 app
   .use(store)
   .use(router)
+  .use(FloatingVue)
   .use(Hotkeys)
   .directive('selectable', {
     mounted(el, binding, node) {

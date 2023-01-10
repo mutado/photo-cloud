@@ -14,25 +14,51 @@
       <v-button :disabled="!selected.length">
         <i class="bi bi-light bi-box-arrow-up"></i>
       </v-button>
-      <v-button :disabled="!selected.length">
-        <i class="bi bi-light bi-trash3"></i>
-      </v-button>
+      <VDropdown>
+        <v-button :disabled="!selected.length">
+          <i class="bi bi-light bi-trash3"></i>
+        </v-button>
+        <template #popper>
+          <div class="popDeleteContainer">
+            <div class="popDeleteMessage">
+              Are you sure you want to delete these photos from album?
+            </div>
+            <div class="popDeleteButtons">
+              <button
+                @click="deletePhotos"
+                v-close-popper
+                class="popDeleteButton"
+                id="popDeleteYes"
+              >
+                Yes
+              </button>
+              <button
+                v-close-popper
+                class="popDeleteButton"
+                id="popDeleteCancel"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </template>
+      </VDropdown>
     </div>
   </teleport>
-  <items-grid v-if="loaded && photos?.length !== 0">
+  <items-grid v-if="loaded && photoReferences?.length !== 0">
     <photo-thumbnail
-      v-selectable:[photo.id]="{
+      v-selectable:[photoReference.id]="{
         getItems: getPhotoIds,
         setSelection: setSelection,
         getSelection: getSelection
       }"
-      :class="{ selected: selected.includes(photo.id) }"
-      v-for="photo in photos"
-      :key="photo.id"
-      :photo_id="photo.id"
+      :class="{ selected: selected.includes(photoReference.id) }"
+      v-for="photoReference in photoReferences"
+      :key="photoReference.id"
+      :photo_id="photoReference.photo_id"
     />
   </items-grid>
-  <div v-else-if="photos?.length == 0">
+  <div v-else-if="photoReferences?.length == 0">
     <p class="text-center">No photos in this folder</p>
   </div>
 </template>
@@ -43,6 +69,8 @@ import PhotoThumbnail from '@/components/PhotoThumbnail.vue'
 import VButton from '@/components/VButton.vue'
 import ZoomControl from '@/components/ZoomControl.vue'
 import { defineComponent } from 'vue'
+import { Item } from '@vuex-orm/core'
+import FolderPhoto from '@/models/FolderPhoto'
 
 export default defineComponent({
   name: 'PhotosView',
@@ -66,7 +94,12 @@ export default defineComponent({
       return this.selected
     },
     getPhotoIds() {
-      return this.photos?.map((photo: any) => photo.id)
+      return this.photoReferences?.map((photo: any) => photo.id)
+    },
+    deletePhotos() {
+      this.getSelection().forEach((reference_id: string) => {
+        FolderPhoto.destroy(this.folderId, reference_id)
+      })
     }
   },
   mounted() {
@@ -75,14 +108,14 @@ export default defineComponent({
     })
   },
   computed: {
-    folderId() {
-      return this.$route.params.id
+    folderId(): string {
+      return this.$route.params.id as string
     },
-    photos() {
-      return Folder.query()
-        .with('photo_references.photo')
-        .find(this.$route.params.id)
-        ?.photo_references.map((ref: any) => ref.photo)
+    photoReferences(): FolderPhoto[] | undefined {
+      return this.folder?.photo_references
+    },
+    folder(): Item<Folder> {
+      return Folder.query().with('photo_references').find(this.folderId)
     }
   },
   watch: {
@@ -105,3 +138,32 @@ export default defineComponent({
   }
 })
 </script>
+
+<style>
+.headerChild {
+  display: flex;
+  flex-direction: row;
+}
+
+.popDeleteContainer {
+  padding-top: 2%;
+}
+.popDeleteButtons {
+  padding: 2%;
+}
+.popDeleteButton {
+  width: 48%;
+  margin: 1%;
+  padding: 1.5%;
+  border-radius: 10px;
+  border: 0px;
+}
+#popDeleteYes {
+  background-color: #171717;
+  color: #eeeeee;
+}
+#popDeleteCancel {
+  background-color: #171717;
+  color: #eeeeee;
+}
+</style>

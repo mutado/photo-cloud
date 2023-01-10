@@ -125,6 +125,19 @@ export default class Photo extends Model {
       })
   }
 
+  static destroy(id: string) {
+    return this.api()
+      .delete(process.env.VUE_APP_BASE_URL + '/api/photos/' + id, {
+        delete: id
+      })
+      .then((response) => {
+        Photo.commit((state) => {
+          state.count -= 1
+        })
+        return response
+      })
+  }
+
   // lazy load image
   get image() {
     if (this.image_loading || this.image_loaded) {

@@ -23,4 +23,27 @@ export default class FolderPhoto extends Model {
   static index() {
     return this.api().get(process.env.VUE_APP_BASE_URL + '/api/folder_photos')
   }
+
+  static post(folder_id: string, photo_id: string) {
+    return this.api().post(
+      process.env.VUE_APP_BASE_URL +
+        '/api/folders/' +
+        folder_id +
+        '/photos/' +
+        photo_id
+    )
+  }
+
+  static destroy(folder_id: string, reference_id: string) {
+    return this.api().delete(
+      process.env.VUE_APP_BASE_URL +
+        '/api/folders/' +
+        folder_id +
+        '/references/' +
+        reference_id,
+      {
+        delete: reference_id
+      }
+    )
+  }
 }

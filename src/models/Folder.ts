@@ -57,4 +57,13 @@ export default class Folder extends Model {
   static post(data: any) {
     return this.api().post(process.env.VUE_APP_BASE_URL + '/api/folders', data)
   }
+
+  static destroy(folder_id: string) {
+    return this.api().delete(
+      process.env.VUE_APP_BASE_URL + '/api/folders/' + folder_id,
+      {
+        delete: folder_id
+      }
+    )
+  }
 }
