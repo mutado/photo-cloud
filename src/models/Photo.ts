@@ -78,6 +78,19 @@ export default class Photo extends Model {
     return this.api().get(process.env.VUE_APP_BASE_URL + '/api/photos/' + id)
   }
 
+  static destroy(ids: string[]) {
+    let promises = [] as Promise<any>[]
+    ids.forEach((id) => {
+      promises.push(
+        this.api().delete(process.env.VUE_APP_BASE_URL + '/api/photos/' + id, {
+          save: false,
+          delete: id
+        })
+      )
+    })
+    return promises
+  }
+
   static stats() {
     return this.api()
       .get(process.env.VUE_APP_BASE_URL + '/api/statistics/summary', {
@@ -132,28 +145,46 @@ export default class Photo extends Model {
     }
     console.log('loading image')
     this.image_loading = true
-    this.thumbnail_loading = true
     this.$save()
 
     api
       .get(this.path, {
         params: {
-          format: 'base64'
+          format: 'data-url'
         }
       })
       .then((response) => {
-        this.image_base64 = `data:image;base64,${response.data}`
-        this.thumbnail_base64 = this.image_base64
+        this.image_base64 = response.data
         this.image_loaded = true
-        this.thumbnail_loaded = true
         this.image_loading = false
-        this.thumbnail_loading = false
+        console.log('full size image loaded')
         this.$save()
       })
     return this.image_base64
   }
 
   get thumbnail() {
-    return this.image
+    if (this.thumbnail_loading || this.thumbnail_loaded) {
+      return this.thumbnail_base64
+    }
+    console.log('loading image')
+    this.thumbnail_loading = true
+    this.$save()
+
+    api
+      .get(this.path, {
+        params: {
+          format: 'data-url',
+          resolution: 'low',
+          quality: 25
+        }
+      })
+      .then((response) => {
+        this.thumbnail_base64 = response.data
+        this.thumbnail_loaded = true
+        this.thumbnail_loading = false
+        this.$save()
+      })
+    return this.thumbnail_base64
   }
 }

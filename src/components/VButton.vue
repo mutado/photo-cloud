@@ -54,11 +54,11 @@ export default defineComponent({
     }
   },
   methods: {
-    onClick() {
+    onClick($event: MouseEvent) {
       if (this.to) {
         this.$router.push(this.to)
       }
-      this.$emit('click')
+      this.$emit('click', $event)
     }
   },
   computed: {

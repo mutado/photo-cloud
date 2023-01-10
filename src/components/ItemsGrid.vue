@@ -4,6 +4,9 @@
     :style="{
       gridTemplateColumns: `repeat(${12 - zoom},1fr)`
     }"
+    :class="{
+      center: aspectRatio
+    }"
   >
     <slot />
   </div>
@@ -16,6 +19,9 @@ export default defineComponent({
   computed: {
     zoom() {
       return Math.trunc(this.$store.state.entities.photos.zoom)
+    },
+    aspectRatio() {
+      return this.$store.state.entities.photos.center_image
     }
   }
 })
@@ -26,6 +32,14 @@ export default defineComponent({
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   grid-gap: 1rem;
   padding: 1rem;
+  transition: gap 0.5s;
+  grid-auto-flow: row;
+}
+.grid > * {
+  aspect-ratio: 1/1;
+}
+.center {
+  gap: 0.3rem !important;
 }
 @media screen and (max-width: 768px) {
   .grid {

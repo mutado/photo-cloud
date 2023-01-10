@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper">
-    <v-button @click="updateValue(modelValue - 1)">
+    <v-button @click="updateValue(Math.trunc(modelValue) - 0.5)">
       <i class="bi bi-light bi-dash" />
     </v-button>
     <input
@@ -11,7 +11,7 @@
       :max="max"
       :step="step"
     />
-    <v-button @click="updateValue(modelValue + 1)">
+    <v-button @click="updateValue(Math.trunc(modelValue) + 1.5)">
       <i class="bi bi-light bi-plus" />
     </v-button>
   </div>
