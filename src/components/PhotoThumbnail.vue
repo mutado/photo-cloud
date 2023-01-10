@@ -51,7 +51,7 @@
 <script lang="ts">
 import { onIntersect } from '@/composables/onIntersect'
 import Photo from '@/models/Photo'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   name: 'PhotoThumbnail',
@@ -65,7 +65,8 @@ export default defineComponent({
       default: false
     },
     slide: {
-      type: String,
+      type: String as PropType<string | null>,
+      required: false,
       default: null
     }
   },

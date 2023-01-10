@@ -78,19 +78,6 @@ export default class Photo extends Model {
     return this.api().get(process.env.VUE_APP_BASE_URL + '/api/photos/' + id)
   }
 
-  static destroy(ids: string[]) {
-    let promises = [] as Promise<any>[]
-    ids.forEach((id) => {
-      promises.push(
-        this.api().delete(process.env.VUE_APP_BASE_URL + '/api/photos/' + id, {
-          save: false,
-          delete: id
-        })
-      )
-    })
-    return promises
-  }
-
   static stats() {
     return this.api()
       .get(process.env.VUE_APP_BASE_URL + '/api/statistics/summary', {
