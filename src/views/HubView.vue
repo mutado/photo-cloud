@@ -1,13 +1,12 @@
 <template>
-  <!-- <div id="Hub"> -->
   <Header />
   <div class="content">
     <Sidebar class="sidebar" :class="{ open: sidebar }" />
-    <section ref="scroller" @scroll="onScroll">
+    <section id="main-section">
+      <!-- <div id="presenter-view"></div> -->
       <router-view />
     </section>
   </div>
-  <!-- </div> -->
 </template>
 
 <script lang="ts">
@@ -47,6 +46,25 @@ export default defineComponent({
 })
 </script>
 <style scoped>
+#presenter-view {
+  position: absolute;
+  overflow: hidden;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#presenter-view > * {
+  transform: none !important;
+}
+#main-section {
+  position: relative;
+  transform-origin: center center;
+}
 .content {
   display: grid;
   grid-template-columns: 227px 4fr;
@@ -57,7 +75,6 @@ export default defineComponent({
 }
 section {
   height: calc(100vh - 51px);
-  overflow-y: auto;
   background-color: rgba(21, 21, 21, 0.99);
 }
 @media screen and (max-width: 768px) {

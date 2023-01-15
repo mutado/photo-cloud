@@ -5,22 +5,18 @@ import router from './router'
 import store from './store'
 import 'normalize.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
-import { ObserveVisibility } from 'vue-observe-visibility'
 import FloatingVue from 'floating-vue'
 import 'floating-vue/dist/style.css'
+import 'intersection-observer'
+import Modal from './plugins/modal'
+import Hotkeys from './plugins/hotkeys'
 
-createApp(App)
+const app = createApp(App)
+app
   .use(store)
   .use(router)
   .use(FloatingVue)
-  .directive('observe-visibility', {
-    beforeMount: (el, binding, node) => {
-      ;(node as any).context = binding.instance
-      ObserveVisibility.bind(el, binding, node)
-    },
-    updated: ObserveVisibility.update,
-    unmounted: ObserveVisibility.unbind
-  })
+  .use(Hotkeys)
   .directive('selectable', {
     mounted(el, binding, node) {
       const addToSelection = (
@@ -39,6 +35,8 @@ createApp(App)
 
       el.addEventListener('mousedown', (e: any) => {
         if (e.button !== 0) return
+
+        if (!binding.value.isEnabled()) return
 
         let selected = binding.value.getSelection() as string[]
         if (e.metaKey || e.ctrlKey) {
@@ -70,3 +68,5 @@ createApp(App)
     }
   })
   .mount('#app')
+
+app.use(Modal)

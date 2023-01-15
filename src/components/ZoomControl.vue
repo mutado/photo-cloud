@@ -12,7 +12,7 @@
         class="bi bi-light bi-arrows-angle-expand"
       ></i>
     </v-button>
-    <v-range v-model="zoom" :min="3" :max="9" :step="0.1" />
+    <v-range v-model="zoom" :min="3.99" :max="9.1" :step="0.1" />
   </div>
 </template>
 <script lang="ts">
