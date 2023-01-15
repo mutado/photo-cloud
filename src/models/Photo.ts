@@ -1,6 +1,7 @@
 import api from '@/api'
 import _default, { Fields, Model } from '@vuex-orm/core'
 import axios from 'axios'
+import FolderPhoto from './FolderPhoto'
 
 export default class Photo extends Model {
   static entity = 'photos'
@@ -55,6 +56,15 @@ export default class Photo extends Model {
       image_loading: this.attr(false),
       image_base64: this.attr(null)
     }
+  }
+
+  static afterDelete(model: any) {
+    FolderPhoto.query()
+      .where('photo_id', model.id)
+      .get()
+      .forEach((ph: FolderPhoto) => {
+        ph.$delete()
+      })
   }
 
   static index(page: number) {
