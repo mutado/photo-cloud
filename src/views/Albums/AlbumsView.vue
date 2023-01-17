@@ -41,7 +41,8 @@
       v-selectable:[folder.id]="{
         getItems: getFolderIds,
         setSelection: setSelection,
-        getSelection: getSelection
+        getSelection: getSelection,
+        isEnabled: () => true
       }"
       :class="{ selected: selected.includes(folder.id) }"
     />
