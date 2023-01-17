@@ -50,7 +50,8 @@
       v-selectable:[photoReference.id]="{
         getItems: getPhotoIds,
         setSelection: setSelection,
-        getSelection: getSelection
+        getSelection: getSelection,
+        isEnabled: () => true
       }"
       :class="{ selected: selected.includes(photoReference.id) }"
       v-for="photoReference in photoReferences"
