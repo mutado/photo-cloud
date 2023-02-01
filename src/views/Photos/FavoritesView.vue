@@ -162,15 +162,6 @@
         }"
       />
     </items-grid>
-    <input
-      @input="submitPhotos"
-      id="fileUpload"
-      type="file"
-      ref="fileUpload"
-      accept="image/png, image/jpeg"
-      multiple
-      hidden
-    />
   </div>
   <div v-else class="wrapper">
     <div class="empty">
@@ -178,6 +169,15 @@
       <p>No photos in library</p>
     </div>
   </div>
+  <input
+    @input="submitPhotos"
+    id="fileUpload"
+    type="file"
+    ref="fileUpload"
+    accept="image/png, image/jpeg"
+    multiple
+    hidden
+  />
 </template>
 <script lang="ts">
 import PhotoThumbnail from '@/components/PhotoThumbnail.vue'
