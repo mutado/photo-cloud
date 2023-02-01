@@ -37,8 +37,10 @@ export default class Folder extends Model {
     }
   }
 
-  static index() {
-    return this.api().get(process.env.VUE_APP_BASE_URL + '/api/folders')
+  static index(props = null as any) {
+    return this.api().get(process.env.VUE_APP_BASE_URL + '/api/folders', {
+      params: props
+    })
   }
 
   static show(folder_id: string) {

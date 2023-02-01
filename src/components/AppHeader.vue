@@ -72,6 +72,8 @@ header {
   justify-content: space-between;
   background-color: rgba(98, 98, 98, 0.9);
   padding: 7px 24px;
+  overflow: hidden;
+  height: 51px;
 }
 .buttons .render {
   height: 100%;

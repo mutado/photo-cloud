@@ -11,54 +11,37 @@
             <i class="bi bi-light bi-folder-plus"></i>
           </v-button>
           <template #popper>
-            <div class="popFoldersMessage">Add photos to folder</div>
-            <div
-              class="popFolders"
-              ref="folder"
-              v-for="(folder, index) in folders"
-              @click="addToFolder(index)"
-              v-close-popper
-            >
-              <i class="bi bi-collection"></i>
-              {{ folder.name }}
-            </div>
+            <folders-dropdown :selected="selected" />
           </template>
         </VDropdown>
-        <v-button :disabled="!selected.length">
-          <i class="bi bi-light bi-heart"></i>
+        <v-button
+          :disabled="!selected.length"
+          @click="
+            toggleFavorite(
+              selected,
+              selectedPhotos.some((ph) => ph.favorite === false)
+            )
+          "
+        >
+          <i
+            class="bi bi-light"
+            :class="[
+              selected.length &&
+              selectedPhotos.every((ph) => ph.favorite === true)
+                ? 'bi-heart-fill'
+                : 'bi-heart'
+            ]"
+          ></i>
         </v-button>
         <v-button :disabled="!selected.length">
           <i class="bi bi-light bi-box-arrow-up"></i>
         </v-button>
-        <VDropdown>
-          <v-button :disabled="!selected.length">
-            <i class="bi bi-light bi-trash3"></i>
-          </v-button>
-          <template #popper>
-            <div class="popDeleteContainer">
-              <div class="popDeleteMessage">
-                Are you sure you want to delete these photos?
-              </div>
-              <div class="popDeleteButtons">
-                <button
-                  @click="deletePhotos"
-                  v-close-popper
-                  class="popDeleteButton"
-                  id="popDeleteYes"
-                >
-                  Yes
-                </button>
-                <button
-                  v-close-popper
-                  class="popDeleteButton"
-                  id="popDeleteCancel"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </template>
-        </VDropdown>
+        <v-button
+          :disabled="!selected.length"
+          @click="deleteSelectedPhotos(selected)"
+        >
+          <i class="bi bi-light bi-trash3"></i>
+        </v-button>
       </div>
     </template>
     <template v-else>
@@ -68,28 +51,51 @@
       </v-button>
       <div class="headerChild">
         <v-button>
-          <i class="bi bi-light bi-folder-plus"></i>
+          <VDropdown>
+            <v-dropdown>
+              <i class="bi bi-light bi-info-circle"></i>
+            </v-dropdown>
+            <template #popper>
+              <photo-info :photoId="fullScreen" />
+            </template>
+          </VDropdown>
         </v-button>
+
         <v-button>
-          <i class="bi bi-light bi-heart"></i>
+          <VDropdown>
+            <v-button>
+              <i class="bi bi-light bi-folder-plus"></i>
+            </v-button>
+            <template #popper>
+              <folders-dropdown :selected="[fullScreen]" />
+            </template>
+          </VDropdown>
+        </v-button>
+        <v-button
+          @click="toggleFavorite([fullScreen], !fullScreenPhoto?.favorite)"
+        >
+          <i
+            class="bi bi-light"
+            :class="[fullScreenPhoto?.favorite ? 'bi-heart-fill' : 'bi-heart']"
+          ></i>
         </v-button>
         <v-button>
           <i class="bi bi-light bi-box-arrow-up"></i>
         </v-button>
-        <v-button @click="deleteSelectedPhotos">
+        <v-button @click="deleteSelectedPhotos([fullScreen])">
           <i class="bi bi-light bi-trash3"></i>
         </v-button>
       </div>
     </template>
   </teleport>
-  <transition name="fade" @enter="overlayEnter">
+  <transition name="fade">
     <div
       id="photo-navigator"
       class="overlay"
       v-show="fullScreen !== null"
       ref="overlay"
-      v-hot.left="navigatePrev"
-      v-hot.right="navigateNext"
+      v-hot.left="navigateNext"
+      v-hot.right="navigatePrev"
       v-hot.esc="closeFullscreen"
     >
       <div
@@ -98,7 +104,7 @@
           photos.findIndex((ph) => ph.id == fullScreen) !== photos.length - 1
         "
       >
-        <v-button @click.stop="navigatePrev">
+        <v-button @click.stop="navigateNext">
           <i class="bi bi-light bi-chevron-left"></i>
         </v-button>
       </div>
@@ -106,7 +112,7 @@
         class="navigate navigate-right"
         v-if="photos.findIndex((ph) => ph.id == fullScreen) !== 0"
       >
-        <v-button @click.stop="navigateNext">
+        <v-button @click.stop="navigatePrev">
           <i class="bi bi-light bi-chevron-right"></i>
         </v-button>
       </div>
@@ -117,7 +123,7 @@
             <div class="photos-container">
               <div
                 ref="navigator-photos"
-                v-for="photo in photos.slice().reverse()"
+                v-for="photo in photos"
                 :data-id="photo.id"
                 :key="photo.id"
                 @click="navigatorOpen(photo.id)"
@@ -131,9 +137,15 @@
       </transition>
     </div>
   </transition>
-  <div class="wrapper" ref="container" :class="{ fullScreen: fullScreen }">
+  <div
+    v-if="photos && photos.length"
+    class="wrapper"
+    ref="container"
+    :class="{ fullScreen: fullScreen }"
+  >
     <items-grid class="pos-relative">
       <photo-thumbnail
+        favorite
         ref="photos"
         :data-id="photo.id"
         v-for="photo in photos.slice().reverse()"
@@ -143,9 +155,9 @@
         @dblclick="openFullscreen(photo.id)"
         :slide="
           slideLeft === photo.id
-            ? 'left'
-            : slideRight === photo.id
             ? 'right'
+            : slideRight === photo.id
+            ? 'left'
             : null
         "
         v-selectable:[photo.id]="{
@@ -161,15 +173,21 @@
         }"
       />
     </items-grid>
-    <photo-stats ref="stats" />
     <input
       @input="submitPhotos"
       id="fileUpload"
       type="file"
       ref="fileUpload"
       accept="image/png, image/jpeg"
+      multiple
       hidden
     />
+  </div>
+  <div v-else class="wrapper">
+    <div class="empty">
+      <i class="bi bi-light bi-image"></i>
+      <p>No photos in library</p>
+    </div>
   </div>
 </template>
 <script lang="ts">
@@ -185,6 +203,9 @@ import { defineComponent } from 'vue'
 import router from '@/router'
 import Folder from '@/models/Folder'
 import FolderPhoto from '@/models/FolderPhoto'
+import ConfirmDialog from '@/components/Modals/ConfirmDialog.vue'
+import FoldersDropdown from '@/components/FoldersDropdown.vue'
+import PhotoInfo from '@/components/PhotoInfo.vue'
 
 export default defineComponent({
   components: {
@@ -194,7 +215,9 @@ export default defineComponent({
     VButton,
     ItemsGrid,
     VSelectable,
-    VModal
+    VModal,
+    FoldersDropdown,
+    PhotoInfo
   },
   data() {
     return {
@@ -209,10 +232,6 @@ export default defineComponent({
     }
   },
   mounted() {
-    this.loadMore().then(() => {
-      this.scrollToBottom()
-    })
-    this.scrollToBottom()
     Folder.index()
   },
   methods: {
@@ -224,26 +243,28 @@ export default defineComponent({
       if (this.fullScreen === null) return
       this.openFullscreen(-1)
     },
-    overlayEnter() {
-      // const bound = document
-      //   .getElementById('main-section')
-      //   ?.getBoundingClientRect()
-      // // this.$refs.overlay.style.top = bound?.scrollTop + 'px'
-      // this.$refs.overlay.style.top = bound?.top + 'px'
-      // this.$refs.overlay.style.left = bound?.left + 'px'
-      // this.$refs.overlay.style.width = bound?.width + 'px'
-      // this.$refs.overlay.style.height = bound?.height + 'px'
-    },
-    deleteSelectedPhotos() {
-      // let promises = Photo.destroy(this.selected)
-      // let finished = 0
-      // this.selected = []
-      // promises.forEach((promise) => {
-      //   promise.then(() => {
-      //     finished++
-      //     console.log(Math.trunc((finished / promises.length) * 100) + '%')
-      //   })
-      // })
+    deleteSelectedPhotos(selected: string[]) {
+      this.$modal
+        .show(ConfirmDialog, {
+          props: {
+            title: `Delete ${selected.length} photo${
+              selected.length > 1 ? 's' : ''
+            }?`,
+            message: `Are you sure you want to delete ${selected.length} photo${
+              selected.length > 1 ? 's' : ''
+            }? You can still recover ${
+              selected.length > 1 ? 'them' : 'it'
+            } from the trash for 30 days.`,
+            confirmText: 'Delete',
+            dismissText: 'Cancel',
+            ctaButton: 'success'
+          }
+        })
+        .then((result) => {
+          if (result) {
+            Photo.destroy(selected)
+          }
+        })
     },
     navigatorEnter() {
       this.navigatorScrollTo(this.fullScreen as string, true)
@@ -346,7 +367,10 @@ export default defineComponent({
       document.getElementById('fileUpload')!.click()
     },
     submitPhotos() {
-      Photo.upload(this.$refs.fileUpload.files[0])
+      console.log(this.$refs.fileUpload.files)
+      for (let i = 0; i < this.$refs.fileUpload.files.length; i++) {
+        Photo.upload(this.$refs.fileUpload.files[i])
+      }
       this.$refs.fileUpload.value = null
     },
     addToFolder(index: number) {
@@ -354,10 +378,8 @@ export default defineComponent({
         FolderPhoto.post(this.folders[index].id, photo_id)
       })
     },
-    deletePhotos() {
-      this.getSelection().forEach((photo_id: string) => {
-        Photo.destroy(photo_id)
-      })
+    toggleFavorite(ids: string[], favorite: boolean) {
+      Photo.updateFavorite(ids, favorite)
     }
   },
   watch: {
@@ -372,26 +394,46 @@ export default defineComponent({
     }
   },
   computed: {
-    photos: () => Photo.query().orderBy('created_at', 'desc').get(),
-    folders() {
+    photos(): Photo[] {
+      return Photo.query().orderBy('photo_date', 'desc').get()
+    },
+    fullScreenPhoto(): Photo | null {
+      return Photo.find(this.fullScreen!)
+    },
+    selectedPhotos(): Photo[] {
+      return Photo.query()
+        .where((photo: Photo) => this.selected.includes(photo.id))
+        .get()
+    },
+    folders(): Folder[] {
       return Folder.all()
     },
-    zoom() {
+    zoom(): number {
       return Math.floor(this.$store.state.entities.photos.zoom)
     },
-    photoPage() {
+    photoPage(): number {
       return this.$store.state.entities.photos.page
     },
-    photoCount() {
+    photoCount(): number {
       return this.$store.state.entities.photos.count
     },
-    scrollTop() {
+    scrollTop(): number {
       return this.$store.state.entities.photos.scrollTop
     }
   }
 })
 </script>
 <style scoped>
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  text-align: center;
+  color: #ccc;
+}
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 300ms;
@@ -459,8 +501,7 @@ photo-stats {
 .popFolders {
   border: #171717 solid 1px;
   border-radius: 5px;
-  margin: 1%;
-  padding: 1%;
+  height: 30vh;
 }
 
 .overlay {

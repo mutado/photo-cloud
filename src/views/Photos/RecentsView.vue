@@ -3,11 +3,22 @@
     <template v-if="!fullScreen">
       <zoom-control aspect-ratio />
       <div class="headerChild">
+        <v-button @click="choosePhotos">
+          <i class="bi bi-light bi-cloud-upload"></i>
+        </v-button>
+        <VDropdown>
+          <v-button :disabled="!selected.length">
+            <i class="bi bi-light bi-folder-plus"></i>
+          </v-button>
+          <template #popper>
+            <folders-dropdown :selected="selected" />
+          </template>
+        </VDropdown>
         <v-button
           :disabled="!selected.length"
           @click="
             toggleFavorite(
-              selectedPhotos.map((ph) => ph.id),
+              selected,
               selectedPhotos.some((ph) => ph.favorite === false)
             )
           "
@@ -22,14 +33,15 @@
             ]"
           ></i>
         </v-button>
-        <VDropdown>
-          <v-button
-            :disabled="!selected.length"
-            @click="deletePhotos(selected)"
-          >
-            <i class="bi bi-light bi-trash3"></i>
-          </v-button>
-        </VDropdown>
+        <v-button :disabled="!selected.length">
+          <i class="bi bi-light bi-box-arrow-up"></i>
+        </v-button>
+        <v-button
+          :disabled="!selected.length"
+          @click="deleteSelectedPhotos(selected)"
+        >
+          <i class="bi bi-light bi-trash3"></i>
+        </v-button>
       </div>
     </template>
     <template v-else>
@@ -38,25 +50,34 @@
         Back
       </v-button>
       <div class="headerChild">
+        <v-button>
+          <VDropdown>
+            <v-button>
+              <i class="bi bi-light bi-folder-plus"></i>
+            </v-button>
+            <template #popper>
+              <folders-dropdown :selected="[fullScreen]" />
+            </template>
+          </VDropdown>
+        </v-button>
         <v-button
-          @click="
-            toggleFavorite([fullScreenPhoto.id], !fullScreenPhoto.favorite)
-          "
+          @click="toggleFavorite([fullScreen], !fullScreenPhoto?.favorite)"
         >
           <i
             class="bi bi-light"
             :class="[fullScreenPhoto?.favorite ? 'bi-heart-fill' : 'bi-heart']"
           ></i>
         </v-button>
-        <VDropdown>
-          <v-button @click="deletePhotos([fullScreenReference.id])">
-            <i class="bi bi-light bi-trash3"></i>
-          </v-button>
-        </VDropdown>
+        <v-button>
+          <i class="bi bi-light bi-box-arrow-up"></i>
+        </v-button>
+        <v-button @click="deleteSelectedPhotos([fullScreen])">
+          <i class="bi bi-light bi-trash3"></i>
+        </v-button>
       </div>
     </template>
   </teleport>
-  <transition name="fade" v-if="photoReferences">
+  <transition name="fade" @enter="overlayEnter">
     <div
       id="photo-navigator"
       class="overlay"
@@ -69,8 +90,7 @@
       <div
         class="navigate navigate-left"
         v-if="
-          photoReferences.findIndex((ph) => ph.id == fullScreen) !==
-          photoReferences.length - 1
+          photos.findIndex((ph) => ph.id == fullScreen) !== photos.length - 1
         "
       >
         <v-button @click.stop="navigatePrev">
@@ -79,7 +99,7 @@
       </div>
       <div
         class="navigate navigate-right"
-        v-if="photoReferences.findIndex((ph) => ph.id == fullScreen) !== 0"
+        v-if="photos.findIndex((ph) => ph.id == fullScreen) !== 0"
       >
         <v-button @click.stop="navigateNext">
           <i class="bi bi-light bi-chevron-right"></i>
@@ -92,13 +112,13 @@
             <div class="photos-container">
               <div
                 ref="navigator-photos"
-                v-for="photo in photoReferences.slice().reverse()"
+                v-for="photo in photos.slice().reverse()"
                 :data-id="photo.id"
                 :key="photo.id"
                 @click="navigatorOpen(photo.id)"
                 :class="{ selected: fullScreen === photo.id }"
               >
-                <img :src="photo?.photo.thumbnail" />
+                <img :src="photo.thumbnail" />
               </div>
             </div>
           </div>
@@ -107,7 +127,7 @@
     </div>
   </transition>
   <div
-    v-if="photoReferences && photoReferences.length"
+    v-if="photos && photos.length"
     class="wrapper"
     ref="container"
     :class="{ fullScreen: fullScreen }"
@@ -116,102 +136,92 @@
       <photo-thumbnail
         favorite
         ref="photos"
-        :data-id="photoRef.id"
-        v-for="photoRef in photoReferences!.slice().reverse()"
-        :key="photoRef.id"
-        :photo_id="photoRef.photo_id"
-        :full-screen="fullScreen !== null && fullScreen === photoRef.id"
-        @dblclick="openFullscreen(photoRef.id)"
+        :data-id="photo.id"
+        v-for="photo in photos.slice().reverse()"
+        :key="photo.id"
+        :photo_id="photo.id"
+        :full-screen="fullScreen !== null && fullScreen === photo.id"
+        @dblclick="openFullscreen(photo.id)"
         :slide="
-          slideLeft === photoRef.id
+          slideLeft === photo.id
             ? 'left'
-            : slideRight === photoRef.id
+            : slideRight === photo.id
             ? 'right'
             : null
         "
-        v-selectable:[photoRef.id]="{
+        v-selectable:[photo.id]="{
           getItems: getPhotoIds,
           setSelection: setSelection,
           getSelection: getSelection,
           isEnabled: () => true
         }"
         :class="{
-          selected: selected.includes(photoRef.id),
-          'visually-hidden': fullScreen !== null && fullScreen !== photoRef.id,
-          enlarge: fullScreen === photoRef.id
+          selected: selected.includes(photo.id),
+          'visually-hidden': fullScreen !== null && fullScreen !== photo.id,
+          enlarge: fullScreen === photo.id
         }"
       />
     </items-grid>
+    <input
+      @input="submitPhotos"
+      id="fileUpload"
+      type="file"
+      ref="fileUpload"
+      accept="image/png, image/jpeg"
+      multiple
+      hidden
+    />
   </div>
   <div v-else class="wrapper">
     <div class="empty">
       <i class="bi bi-light bi-image"></i>
-      <p>No photos in this album</p>
+      <p>No photos in library</p>
     </div>
   </div>
 </template>
 <script lang="ts">
-import Folder from '@/models/Folder'
-import ItemsGrid from '@/components/ItemsGrid.vue'
 import PhotoThumbnail from '@/components/PhotoThumbnail.vue'
 import VButton from '@/components/VButton.vue'
-import ZoomControl from '@/components/ZoomControl.vue'
-import { defineComponent } from 'vue'
-import { Item } from '@vuex-orm/core'
-import FolderPhoto from '@/models/FolderPhoto'
 import Photo from '@/models/Photo'
+import PhotoStats from '@/components/PhotoStats.vue'
+import ZoomControl from '@/components/ZoomControl.vue'
+import ItemsGrid from '@/components/ItemsGrid.vue'
+import VSelectable from '@/components/VSelectable.vue'
+import VModal from '@/components/VModal.vue'
+import { defineComponent } from 'vue'
+import router from '@/router'
+import Folder from '@/models/Folder'
+import FolderPhoto from '@/models/FolderPhoto'
 import ConfirmDialog from '@/components/Modals/ConfirmDialog.vue'
+import FoldersDropdown from '@/components/FoldersDropdown.vue'
 
 export default defineComponent({
-  name: 'PhotosView',
   components: {
-    ItemsGrid,
     PhotoThumbnail,
+    PhotoStats,
+    ZoomControl,
     VButton,
-    ZoomControl
+    ItemsGrid,
+    VSelectable,
+    VModal,
+    FoldersDropdown
   },
   data() {
     return {
-      loaded: false,
+      imgs: [],
+      imageAdded: false,
+      inputMessageText: '',
+      loadingHandler: null as any,
       selected: [] as string[],
       fullScreen: null as string | null,
       slideLeft: null as string | null,
       slideRight: null as string | null
     }
   },
+  mounted() {
+    Folder.index()
+  },
   methods: {
-    setSelection(selected: string[]) {
-      this.selected = selected
-    },
-    getSelection() {
-      return this.selected
-    },
-    getPhotoIds() {
-      return this.photoReferences?.map((photo: any) => photo.id)
-    },
-    deletePhotos(selected: string[]) {
-      this.$modal
-        .show(ConfirmDialog, {
-          props: {
-            title: `Remove ${selected.length} photo${
-              selected.length > 1 ? 's' : ''
-            } from album?`,
-            message: `This photo${
-              selected.length > 1 ? 's' : ''
-            } will be removed from this album, but will remain in your photo library.`,
-            confirmText: 'Delete',
-            dismissText: 'Cancel',
-            ctaButton: 'success'
-          }
-        })
-        .then((confirmed: boolean) => {
-          if (confirmed) {
-            FolderPhoto.destroy(this.folderId, selected).then(() => {
-              this.openFullscreen(null)
-            })
-          }
-        })
-    },
     navigatePrev() {
       if (this.fullScreen === null) return
       this.openFullscreen(1)
@@ -219,6 +229,29 @@ export default defineComponent({
     navigateNext() {
       if (this.fullScreen === null) return
       this.openFullscreen(-1)
+    },
+    deleteSelectedPhotos(selected: string[]) {
+      this.$modal
+        .show(ConfirmDialog, {
+          props: {
+            title: `Delete ${selected.length} photo${
+              selected.length > 1 ? 's' : ''
+            }?`,
+            message: `Are you sure you want to delete ${selected.length} photo${
+              selected.length > 1 ? 's' : ''
+            }? You can still recover ${
+              selected.length > 1 ? 'them' : 'it'
+            } from the trash for 30 days.`,
+            confirmText: 'Delete',
+            dismissText: 'Cancel',
+            ctaButton: 'success'
+          }
+        })
+        .then((result) => {
+          if (result) {
+            Photo.destroy(selected)
+          }
+        })
     },
     navigatorEnter() {
       this.navigatorScrollTo(this.fullScreen as string, true)
@@ -246,20 +279,18 @@ export default defineComponent({
       if (typeof photo_id === 'number' || slide === true) {
         console.log('Opening fullscreen with slide')
 
-        let index = this.photoReferences!.findIndex(
-          (ph) => ph.id == this.fullScreen
-        )
+        let index = this.photos.findIndex((ph) => ph.id == this.fullScreen)
         let newIndex = 0
         if (typeof photo_id === 'number') {
           newIndex = index + photo_id
-          if (newIndex < 0 || newIndex >= this.photoReferences!.length) {
+          if (newIndex < 0 || newIndex >= this.photos.length) {
             console.log('Index out of bounds. Aborting.')
             return
           }
         } else {
-          newIndex = this.photoReferences!.findIndex((ph) => ph.id == photo_id)
+          newIndex = this.photos.findIndex((ph) => ph.id == photo_id)
         }
-        let newId = this.photoReferences![newIndex].id
+        let newId = this.photos[newIndex].id
         this.slideLeft = index < newIndex ? this.fullScreen : newId
         this.slideRight = index > newIndex ? this.fullScreen : newId
         this.navigatorScrollTo(newId as string)
@@ -298,65 +329,87 @@ export default defineComponent({
         console.log('Photo is no longer fullscreen.')
       })
     },
+    setSelection(selected: string[]) {
+      this.selected = selected
+    },
+    getSelection() {
+      return this.selected
+    },
+    getPhotoIds() {
+      return this.photos?.map((photo: any) => photo.id)
+    },
+    loadMore() {
+      return (this.loadingHandler = Photo.index(this.photoPage).then(() => {
+        this.loadingHandler = null
+      }))
+    },
+    scrollToBottom() {
+      this.$refs.container.parentElement.scrollTop =
+        this.$refs.container.parentElement.scrollHeight
+    },
+    openPhoto(id: string) {
+      router.push('/photos/' + id)
+    },
+    choosePhotos() {
+      document.getElementById('fileUpload')!.click()
+    },
+    submitPhotos() {
+      console.log(this.$refs.fileUpload.files)
+      for (let i = 0; i < this.$refs.fileUpload.files.length; i++) {
+        Photo.upload(this.$refs.fileUpload.files[i])
+      }
+      this.$refs.fileUpload.value = null
+    },
+    addToFolder(index: number) {
+      this.getSelection().forEach((photo_id: string) => {
+        FolderPhoto.post(this.folders[index].id, photo_id)
+      })
+    },
     toggleFavorite(ids: string[], favorite: boolean) {
       Photo.updateFavorite(ids, favorite)
     }
   },
-  mounted() {
-    Folder.show(this.$route.params.id as string).then(() => {
-      this.loaded = true
-    })
+  watch: {
+    scrollTop(val) {
+      console.log('scrolltop', val)
+      if (val < 100 && this.loadingHandler == null) {
+        console.log(this.photoPage)
+
+        console.log('loading more')
+        this.loadMore()
+      }
+    }
   },
   computed: {
-    folderId(): string {
-      return this.$route.params.id as string
+    photos(): Photo[] {
+      return Photo.query().orderBy('created_at', 'desc').get()
     },
-    photoReferences(): FolderPhoto[] {
-      return this.folder?.photo_references as FolderPhoto[]
-    },
-    folder(): Item<Folder> {
-      return Folder.query().with('photo_references.photo').find(this.folderId)
-    },
-    selectedReferences(): FolderPhoto[] {
-      return this.photoReferences?.filter((photo) =>
-        this.selected.includes(photo.id)
-      )
+    fullScreenPhoto(): Photo | null {
+      return Photo.find(this.fullScreen!)
     },
     selectedPhotos(): Photo[] {
       return Photo.query()
-        .whereIdIn(this.selectedReferences.map((ref) => ref.photo_id))
+        .where((photo: Photo) => this.selected.includes(photo.id))
         .get()
     },
-    fullScreenReference(): FolderPhoto | null {
-      if (this.fullScreen === null) return null
-      return FolderPhoto.query().whereId(this.fullScreen).with('photo').first()
+    folders(): Folder[] {
+      return Folder.all()
     },
-    fullScreenPhoto(): Photo | null {
-      if (this.fullScreenReference === null) return null
-      return this.fullScreenReference.photo
-    }
-  },
-  watch: {
-    folderId() {
-      console.log('folderId changed')
-      if (this.$route.name !== 'album-photos') return
+    zoom(): number {
+      return Math.floor(this.$store.state.entities.photos.zoom)
     },
-    '$route.params.id': {
-      handler: function (id) {
-        console.log('folder id' + id)
-        this.loaded = false
-        if (this.$route.name !== 'album-photos') return
-        Folder.show(this.$route.params.id as string).then(() => {
-          this.loaded = true
-        })
-      },
-      deep: true,
-      immediate: true
+    photoPage(): number {
+      return this.$store.state.entities.photos.page
+    },
+    photoCount(): number {
+      return this.$store.state.entities.photos.count
+    },
+    scrollTop(): number {
+      return this.$store.state.entities.photos.scrollTop
     }
   }
 })
 </script>
-
 <style scoped>
 .empty {
   display: flex;

@@ -6,6 +6,7 @@
       {
         'v-button--primary': primary,
         'v-button--secondary': secondary,
+        'v-button--success': success,
         'v-button--danger': danger,
         'v-button--disabled': disabled,
         'v-button--sidebar': sidebar,
@@ -33,6 +34,10 @@ export default defineComponent({
       default: false
     },
     secondary: {
+      type: Boolean,
+      default: false
+    },
+    success: {
       type: Boolean,
       default: false
     },

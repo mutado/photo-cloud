@@ -11,8 +11,15 @@ export default class Photo extends Model {
   path!: string
   width!: number
   height!: number
+  favorite!: boolean
+  hidden!: boolean
   created_at!: string
   updated_at!: string
+  deleted_at!: string
+  photo_date!: string
+  country!: string
+  city!: string
+  tags!: any
 
   thumbnail_loaded!: boolean
   thumbnail_loading!: boolean
@@ -45,8 +52,15 @@ export default class Photo extends Model {
       path: this.attr(''),
       width: this.attr(0),
       height: this.attr(0),
+      favorite: this.attr(false),
+      hidden: this.attr(false),
       created_at: this.attr(''),
       updated_at: this.attr(''),
+      deleted_at: this.attr(''),
+      photo_date: this.attr(''),
+      country: this.attr(''),
+      city: this.attr(''),
+      tags: this.attr(null),
 
       thumbnail_loaded: this.attr(false),
       thumbnail_loading: this.attr(false),
@@ -67,11 +81,12 @@ export default class Photo extends Model {
       })
   }
 
-  static index(page: number) {
+  static index(page: number, props = null as any) {
     return this.api()
       .get(process.env.VUE_APP_BASE_URL + '/api/photos', {
         params: {
-          page: page
+          page: page,
+          ...props
         }
       })
       .then((response) => {
@@ -122,17 +137,46 @@ export default class Photo extends Model {
       })
   }
 
-  static destroy(id: string) {
-    return this.api()
-      .delete(process.env.VUE_APP_BASE_URL + '/api/photos/' + id, {
-        delete: id
+  static destroy(ids: string[]) {
+    return Promise.all(
+      ids.map((id) => {
+        return this.api()
+          .delete(process.env.VUE_APP_BASE_URL + '/api/photos/' + id, {
+            delete: id
+          })
+          .then((response) => {
+            Photo.commit((state) => {
+              state.count -= 1
+            })
+            return response
+          })
       })
-      .then((response) => {
-        Photo.commit((state) => {
-          state.count -= 1
-        })
-        return response
+    )
+  }
+
+  static restore(ids: string[]) {
+    return Promise.all(
+      ids.map((id) => {
+        return this.api()
+          .get(process.env.VUE_APP_BASE_URL + '/api/photos/' + id + '/restore')
+          .then((response) => {
+            Photo.commit((state) => {
+              state.count -= 1
+            })
+            return response
+          })
       })
+    )
+  }
+
+  static updateFavorite(ids: string[], favorite: boolean) {
+    return this.api().post(
+      process.env.VUE_APP_BASE_URL + '/api/photos/favorite',
+      {
+        photos: ids,
+        value: favorite
+      }
+    )
   }
 
   // lazy load image
@@ -145,7 +189,7 @@ export default class Photo extends Model {
     this.$save()
 
     api
-      .get(this.path, {
+      .get(`${process.env.VUE_APP_BASE_URL}/api/photos/${this.id}/download`, {
         params: {
           format: 'data-url'
         }
@@ -169,7 +213,7 @@ export default class Photo extends Model {
     this.$save()
 
     api
-      .get(this.path, {
+      .get(`${process.env.VUE_APP_BASE_URL}/api/photos/${this.id}/download`, {
         params: {
           format: 'data-url',
           resolution: 'low',

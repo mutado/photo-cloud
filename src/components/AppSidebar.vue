@@ -5,40 +5,28 @@
       <i class="bi bi-images"></i>
       Library
     </v-button>
-    <v-button class="bar" sidebar>
+    <v-button class="bar" sidebar to="/photos/places">
       <i class="bi bi-images"></i>
       Places
     </v-button>
-    <v-button class="bar" sidebar>
-      <i class="bi bi-star-fill"></i>
+    <v-button class="bar" sidebar to="/photos/favorites">
+      <i class="bi bi-heart-fill"></i>
       Favorites
     </v-button>
-    <v-button class="bar" sidebar>
+    <v-button class="bar" sidebar to="/photos/recents">
       <i class="bi bi-images"></i>
       Recents
     </v-button>
-    <v-button class="bar" sidebar>
+    <v-button class="bar" sidebar to="/photos/deleted">
       <i class="bi bi-images"></i>
       Deleted
     </v-button>
-    <v-button class="bar" sidebar>
-      <i class="bi bi-images"></i>
-      Hidden
-    </v-button>
 
     <small class="color-secondary"><b>Albums</b></small>
-    <v-button class="bar" sidebar>
+    <!-- <v-button class="bar" sidebar>
       <i class="bi bi-people-fill"></i>
       Shared
-    </v-button>
-    <v-button class="bar" sidebar>
-      <i class="bi bi-images"></i>
-      Videos
-    </v-button>
-    <v-button class="bar" sidebar>
-      <i class="bi bi-images"></i>
-      Photos
-    </v-button>
+    </v-button> -->
     <v-button class="bar" sidebar to="/albums">
       <i class="bi bi-folder-fill"></i>
       My Albums

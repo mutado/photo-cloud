@@ -2,6 +2,8 @@
   --color-primary: #eee;
   --color-secondary: #ccc;
   --color-tertiary: #aaa;
+  --color-success: #3370ca;
+  --color-danger: #d20700;
 }
 
 /* use viewport-relative units to cover page fully */
@@ -9,6 +11,7 @@ body {
   height: 100vh;
   /* width: 100vw; */
   color: white;
+  background-color: #161616;
   font-family: Helvetica, sans-serif;
 }
 
@@ -61,6 +64,23 @@ div#app {
 .v-button--disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+.v-button--success {
+  color: var(--color-success);
+}
+
+.v-button--danger {
+  color: var(--color-danger);
+}
+
+.v-button--primary {
+  color: var(--color-primary);
+  border-radius: 5px;
+}
+
+.v-button--primary:hover {
+  background-color: rgba(0, 0, 0, 0.8);
 }
 
 .bi-light {
@@ -118,4 +138,10 @@ div#app {
 ::-webkit-scrollbar-thumb {
   background-color: darkgrey;
   outline: 1px solid slategrey;
+}
+
+.v-popper__inner {
+  background-color: #353535 !important;
+  border: 1px solid #474747 !important;
+  color: var(--color-primary) !important;
 }

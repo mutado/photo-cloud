@@ -37,15 +37,24 @@
         </div>
       </transition>
     </teleport>
-
-    <img
-      v-show="photo?.thumbnail_loaded && (visible || fullScreen)"
-      :src="photo?.thumbnail"
-      :class="renderClass"
-      :style="renderStyle"
-      ref="img"
-      @load="onLoad"
-    />
+    <div
+      class="miniature"
+      v-show="photo?.thumbnail_loaded && (visible || !fullScreen)"
+    >
+      <img
+        :src="photo?.thumbnail"
+        :class="renderClass"
+        :style="renderStyle"
+        ref="img"
+        @load="onLoad"
+      />
+      <i
+        class="bi bi-light"
+        v-if="!fullScreen && favorite"
+        :class="[photo.favorite ? 'bi-heart-fill' : 'bi-heart']"
+        @click="toggleFavorite"
+      />
+    </div>
   </picture>
 </template>
 <script lang="ts">
@@ -56,6 +65,10 @@ import { defineComponent, PropType } from 'vue'
 export default defineComponent({
   name: 'PhotoThumbnail',
   props: {
+    favorite: {
+      type: Boolean,
+      default: false
+    },
     photo_id: {
       type: String,
       required: true
@@ -97,6 +110,9 @@ export default defineComponent({
     this.observer?.disconnect()
   },
   methods: {
+    toggleFavorite() {
+      Photo.updateFavorite([this.photo_id], this.photo?.favorite ? false : true)
+    },
     closeFullscreen() {
       this.$emit('dblclick')
     },
@@ -264,7 +280,7 @@ export default defineComponent({
 <style scoped>
 .fade-enter-active,
 .fade-leave-active {
-  transition: background-color 300ms ease-in-out;
+  transition: background-color 400ms ease-in-out;
 }
 .slide-leave-active,
 .slide-enter-active {
@@ -282,10 +298,10 @@ export default defineComponent({
   transition: transform 300ms ease-in-out;
 }
 
-.fade-enter-active + img,
-.fade-enter-to + img,
-.fade-leave-from + img,
-.fade-leave-active + img,
+.fade-enter-active + .miniature,
+.fade-enter-to + .miniature,
+.fade-leave-from + .miniature,
+.fade-leave-active + .miniature,
 img.hidden {
   visibility: hidden;
 }
@@ -349,6 +365,29 @@ img.hidden {
   transition: 0.5s opacity;
 
   border-color: transparent;
+}
+
+.thumbnail .miniature {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.thumbnail i {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+}
+
+.thumbnail i.bi-heart {
+  opacity: 0;
+  transition: 0.1s opacity ease-in-out;
+}
+.thumbnail:hover i.bi-heart {
+  opacity: 1;
 }
 
 .thumbnail.selected {

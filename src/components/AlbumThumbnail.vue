@@ -1,6 +1,6 @@
 <template>
   <div class="album">
-    <picture class="skeleton" :class="{ stop: !loading }" @dblclick="open">
+    <picture class="skeleton" :class="{ stop: !loading }">
       <svg
         v-if="!photo || !photo.thumbnail_loaded"
         xmlns="http://www.w3.org/2000/svg"
@@ -17,7 +17,7 @@
       <img v-else :src="photo?.thumbnail" @load="loading = false" />
     </picture>
     <div class="cut-text" v-if="!edit" @click="rename">
-      {{ folder.name }}
+      {{ folder ? folder.name : name }}
     </div>
     <div class="cut-text" v-else>
       <input
@@ -40,8 +40,10 @@ export default defineComponent({
   name: 'AlbumThumbnail',
   props: {
     folder_id: {
-      type: String,
-      required: true
+      type: String
+    },
+    name: {
+      type: String
     }
   },
   data() {
@@ -63,7 +65,11 @@ export default defineComponent({
   },
   computed: {
     folder() {
-      return Folder.query().withAllRecursive().find(this.folder_id)
+      if (this.folder_id) {
+        return Folder.query().withAllRecursive().find(this.folder_id)
+      } else {
+        return null
+      }
     },
     photo() {
       return Photo.find(this.folder?.photo_references[0]?.photo_id ?? '')
@@ -80,6 +86,7 @@ export default defineComponent({
       })
     },
     save() {
+      if (!this.folder_id) return
       this.edit = false
       if (!this.folder) return
       if (this.folder.name === '') {
@@ -95,9 +102,6 @@ export default defineComponent({
         Folder.put(this.folder_id, {
           name: this.folder.name
         })
-    },
-    open() {
-      this.$router.push({ name: 'album', params: { id: this.folder_id } })
     }
   }
 })

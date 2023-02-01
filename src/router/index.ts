@@ -21,19 +21,43 @@ const routes: Array<RouteRecordRaw> = [
     beforeEnter: [authGuard],
     children: [
       {
-        path: ':id',
-        name: 'photo',
-        component: () =>
-          import(
-            /* webpackChunkName: "photo" */ '../views/Photos/PhotoView.vue'
-          )
-      },
-      {
         path: '',
         name: 'photos',
         component: () =>
           import(
             /* webpackChunkName: "photos" */ '../views/Photos/PhotosView.vue'
+          )
+      },
+      {
+        path: 'favorites',
+        name: 'favorites',
+        component: () =>
+          import(
+            /* webpackChunkName: "favorites" */ '../views/Photos/FavoritesView.vue'
+          )
+      },
+      {
+        path: 'recents',
+        name: 'recents',
+        component: () =>
+          import(
+            /* webpackChunkName: "recents" */ '../views/Photos/RecentsView.vue'
+          )
+      },
+      {
+        path: 'places',
+        name: 'places',
+        component: () =>
+          import(
+            /* webpackChunkName: "places" */ '../views/Photos/PlacesView.vue'
+          )
+      },
+      {
+        path: 'deleted',
+        name: 'deleted',
+        component: () =>
+          import(
+            /* webpackChunkName: "deleted" */ '../views/Photos/DeletedView.vue'
           )
       }
     ]

@@ -36,7 +36,6 @@ export default defineComponent({
   grid-auto-flow: row;
 }
 .grid > * {
-  aspect-ratio: 1/1;
 }
 .center {
   gap: 0.3rem !important;

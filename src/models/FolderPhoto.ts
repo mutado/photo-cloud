@@ -34,16 +34,20 @@ export default class FolderPhoto extends Model {
     )
   }
 
-  static destroy(folder_id: string, reference_id: string) {
-    return this.api().delete(
-      process.env.VUE_APP_BASE_URL +
-        '/api/folders/' +
-        folder_id +
-        '/references/' +
-        reference_id,
-      {
-        delete: reference_id
-      }
+  static destroy(folder_id: string, ids: string[]) {
+    return Promise.all(
+      ids.map((id) => {
+        return this.api().delete(
+          process.env.VUE_APP_BASE_URL +
+            '/api/folders/' +
+            folder_id +
+            '/references/' +
+            id,
+          {
+            delete: id
+          }
+        )
+      })
     )
   }
 }
